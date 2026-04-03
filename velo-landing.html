@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velo — Your team doesn't need to be online to move forward</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --accent: #c8f03d;
+    --accent-dark: #a8cc2a;
+    --teal: #1a6b5a;
+    --teal-light: #e0f5ef;
+    --muted: #7a7567;
+    --border: rgba(15,14,12,0.12);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+    box-shadow: 0 0 0 1.5px rgba(15,14,12,.35);
+  }
+  .cursor.hover { width: 40px; height: 40px; background: var(--accent); opacity: 0.6; }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 3rem;
+    background: transparent;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  }
+  nav.scrolled {
+    background: rgba(245,242,235,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink) !important;
+    color: var(--accent) !important;
+    padding: 0.6rem 1.4rem;
+    border-radius: 2px;
+    font-weight: 500 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--teal) !important; }
+
+  /* Hero */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  #three-canvas {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--teal);
+    background: var(--teal-light);
+    border: 1px solid rgba(26,107,90,0.2);
+    padding: 0.35rem 0.8rem;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.3s forwards;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 10vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+  .hero-headline em {
+    font-style: normal;
+    color: var(--teal);
+    display: block;
+  }
+  .hero-headline .accent-word {
+    color: var(--paper);
+    -webkit-text-stroke: 2px var(--ink);
+  }
+
+  .hero-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.7s forwards;
+  }
+  .hero-sub {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 480px;
+    font-weight: 300;
+  }
+  .hero-sub strong { color: var(--ink); font-weight: 500; }
+  .hero-actions { display: flex; gap: 1rem; align-items: center; flex-shrink: 0; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--ink); color: var(--accent);
+    font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
+    padding: 0.9rem 2rem; border-radius: 2px; text-decoration: none;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    transition: background 0.2s, transform 0.2s;
+    border: none; cursor: none;
+  }
+  .btn-primary:hover { background: var(--teal); transform: translateY(-2px); }
+  .btn-secondary {
+    font-size: 0.8rem; font-weight: 500; color: var(--muted);
+    text-decoration: none; letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 0.4rem;
+    text-transform: uppercase; cursor: none;
+    transition: color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--ink); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Ticker */
+  .ticker-wrap {
+    background: var(--ink);
+    overflow: hidden;
+    padding: 0.9rem 0;
+    position: relative;
+  }
+  .ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+  .ticker-item {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 0 2.5rem;
+    display: flex; align-items: center; gap: 2.5rem;
+  }
+  .ticker-item::after { content: '×'; color: var(--muted); }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* Stats section */
+  #stats {
+    background: var(--cream);
+    padding: 5rem 3rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .stat-item {
+    padding: 2rem 3rem;
+    border-right: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item.visible { opacity: 1; transform: translateY(0); }
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    display: flex; align-items: flex-start;
+    margin-bottom: 0.75rem;
+  }
+  .stat-number sup {
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 200px;
+  }
+
+  /* Problem/Solution */
+  #problem {
+    padding: 8rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .section-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .section-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 24px; height: 1px;
+    background: var(--muted);
+  }
+  .section-headline {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 5vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 4rem;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .problem-card {
+    background: var(--paper);
+    padding: 2.5rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .problem-card.visible { opacity: 1; transform: translateY(0); }
+  .problem-card:hover { background: var(--cream); }
+  .problem-icon {
+    width: 36px; height: 36px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .problem-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+    color: var(--ink);
+  }
+  .problem-desc {
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* Before/After copy showcase */
+  #copy-showcase {
+    background: var(--ink);
+    padding: 8rem 3rem;
+    color: var(--paper);
+  }
+  .showcase-inner { max-width: 1100px; margin: 0 auto; }
+  .showcase-inner .section-eyebrow { color: rgba(245,242,235,0.4); }
+  .showcase-inner .section-eyebrow::before { background: rgba(245,242,235,0.3); }
+  .showcase-inner .section-headline { color: var(--paper); }
+
+  .copy-toggle {
+    display: flex; gap: 0; margin-bottom: 3rem;
+    border: 1px solid rgba(245,242,235,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    width: fit-content;
+  }
+  .toggle-btn {
+    font-family: var(--font-mono); font-size: 0.72rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.65rem 1.5rem;
+    border: none; cursor: none;
+    background: transparent;
+    color: rgba(245,242,235,0.4);
+    transition: all 0.25s;
+    font-weight: 500;
+  }
+  .toggle-btn.active {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  .copy-panel { display: none; }
+  .copy-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+  .copy-block {
+    border: 1px solid rgba(245,242,235,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .copy-block-header {
+    padding: 0.75rem 1.25rem;
+    background: rgba(245,242,235,0.06);
+    border-bottom: 1px solid rgba(245,242,235,0.12);
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .copy-block-header .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .dot-red { background: #ff6059; }
+  .dot-green { background: var(--accent); }
+  .copy-block-body { padding: 2rem; }
+  .copy-version-label {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(245,242,235,0.3);
+    margin-bottom: 1rem;
+  }
+  .copy-headline-old {
+    font-size: 1.4rem; font-weight: 300;
+    line-height: 1.3; color: rgba(245,242,235,0.45);
+    margin-bottom: 0.75rem; font-style: italic;
+    text-decoration: line-through;
+    text-decoration-color: rgba(245,242,235,0.2);
+  }
+  .copy-headline-new {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--paper);
+    margin-bottom: 0.75rem;
+  }
+  .copy-sub-old {
+    font-size: 0.85rem; line-height: 1.6;
+    color: rgba(245,242,235,0.3); font-weight: 300;
+    font-style: italic;
+  }
+  .copy-sub-new {
+    font-size: 0.9rem; line-height: 1.65;
+    color: rgba(245,242,235,0.7); font-weight: 300;
+  }
+  .copy-annotation {
+    margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid rgba(245,242,235,0.1);
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+  .annotation-tag {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.3rem 0.7rem; border-radius: 2px;
+  }
+  .tag-problem { background: rgba(255,96,89,0.15); color: #ff9591; }
+  .tag-win { background: rgba(200,240,61,0.12); color: var(--accent); }
+  .annotation-text {
+    font-size: 0.78rem; color: rgba(245,242,235,0.45);
+    line-height: 1.55; font-weight: 300;
+  }
+
+  /* How it works */
+  #how {
+    padding: 8rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 4rem;
+  }
+  .how-step {
+    background: var(--paper);
+    padding: 3rem 2.5rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .how-step.visible { opacity: 1; transform: translateY(0); }
+  .how-step:hover { background: var(--cream); }
+  .step-number {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--cream);
+    position: absolute;
+    top: 1.5rem; right: 2rem;
+    letter-spacing: 0.02em;
+  }
+  .step-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--ink);
+    position: relative; z-index: 1;
+  }
+  .step-desc {
+    font-size: 0.875rem;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .step-badge {
+    display: inline-flex; align-items: center;
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: var(--teal-light); color: var(--teal);
+    padding: 0.3rem 0.7rem; border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Testimonial */
+  #testimonial {
+    background: var(--teal);
+    padding: 8rem 3rem;
+    text-align: center;
+  }
+  .testimonial-quote {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    line-height: 0.97;
+    letter-spacing: 0.02em;
+    color: var(--paper);
+    max-width: 900px; margin: 0 auto 3rem;
+  }
+  .testimonial-quote span { color: var(--accent); }
+  .testimonial-source {
+    font-family: var(--font-mono); font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(245,242,235,0.5);
+  }
+
+  /* CTA section */
+  #cta {
+    padding: 8rem 3rem;
+    background: var(--paper);
+    text-align: center;
+  }
+  .cta-inner { max-width: 700px; margin: 0 auto; }
+  .cta-headline {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 7vw, 7rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    margin-bottom: 2rem;
+  }
+  .cta-headline .outline { -webkit-text-stroke: 2px var(--ink); color: transparent; }
+  .cta-sub {
+    font-size: 1rem; line-height: 1.65;
+    color: var(--muted); font-weight: 300;
+    margin-bottom: 3rem;
+  }
+  .cta-actions {
+    display: flex; justify-content: center;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .btn-large {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-family: var(--font-body); font-size: 0.9rem;
+    font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; text-decoration: none;
+    padding: 1.1rem 2.5rem; border-radius: 2px;
+    transition: all 0.2s; cursor: none;
+  }
+  .btn-large.dark { background: var(--ink); color: var(--accent); }
+  .btn-large.dark:hover { background: var(--teal); transform: translateY(-2px); }
+  .btn-large.outline {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-large.outline:hover { border-color: var(--ink); background: var(--cream); }
+
+  /* Footer */
+  footer {
+    background: var(--ink);
+    padding: 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 2rem; letter-spacing: 0.04em;
+    color: var(--paper);
+  }
+  .footer-note {
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(245,242,235,0.3);
+  }
+  .footer-tag {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(200,240,61,0.1);
+    padding: 0.4rem 0.8rem; border-radius: 2px;
+  }
+
+  /* Scroll reveal utility */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Localization toggle */
+  .lang-bar {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .lang-label {
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .lang-pills { display: flex; gap: 4px; }
+  .lang-pill {
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0.35rem 0.9rem; border-radius: 2px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: none; transition: all 0.2s;
+  }
+  .lang-pill.active { background: var(--ink); color: var(--accent); border-color: var(--ink); }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero { padding: 0 1.5rem 3rem; }
+    .hero-bottom { flex-direction: column; align-items: flex-start; }
+    .stats-grid, .problem-grid, .how-grid, .copy-panel.active { grid-template-columns: 1fr; }
+    #stats, #problem, #how, #copy-showcase, #cta, footer { padding: 5rem 1.5rem; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">VELO</a>
+  <div class="nav-links">
+    <a href="#problem" data-es="El problema" data-en="The problem">The problem</a>
+    <a href="#how" data-es="Cómo funciona" data-en="How it works">How it works</a>
+    <a href="#copy-showcase">Before / After</a>
+    <a href="#cta" class="nav-cta">Try free</a>
+  </div>
+  <div class="lang-toggle-nav">
+    <button class="lang-btn-nav" id="lnd-btn-es" onclick="setLang('es')">ES</button>
+    <button class="lang-btn-nav active" id="lnd-btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <canvas id="three-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">Born in LATAM · Scaling global</div>
+    <h1 class="hero-headline">
+      Your team<br>
+      doesn't need<br>
+      <em>to be online</em><br>
+      <span class="accent-word">to move forward.</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-sub">
+        Velo automates the check-ins, handoffs, and status updates slowing your startup down —
+        <strong>so your team moves forward even when no one's watching.</strong>
+      </p>
+      <div class="hero-actions">
+        <a href="#cta" class="btn-primary">Start free →</a>
+        <a href="#how" class="btn-secondary">See how it works ↓</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item" data-es="Automatización async" data-en="Async automation">Async automation</span>
+    <span class="ticker-item" data-es="Startups 1–20 personas" data-en="Startups 1–20 people">Startups 1–20 people</span>
+    <span class="ticker-item" data-es="Zonas horarias múltiples" data-en="Multiple time zones">Multiple time zones</span>
+    <span class="ticker-item" data-es="Sin reuniones de status" data-en="No status meetings">No status meetings</span>
+    <span class="ticker-item" data-es="LATAM · Global · En tus términos" data-en="LATAM · Global · On your terms">LATAM · Global · On your terms</span>
+    <span class="ticker-item" data-es="Automatización async" data-en="Async automation">Async automation</span>
+    <span class="ticker-item" data-es="Startups 1–20 personas" data-en="Startups 1–20 people">Startups 1–20 people</span>
+    <span class="ticker-item" data-es="Zonas horarias múltiples" data-en="Multiple time zones">Multiple time zones</span>
+    <span class="ticker-item" data-es="Sin reuniones de status" data-en="No status meetings">No status meetings</span>
+    <span class="ticker-item" data-es="LATAM · Global · En tus términos" data-en="LATAM · Global · On your terms">LATAM · Global · On your terms</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="stat-number">23<sup>%</sup></div>
+      <p class="stat-label" data-es="del tiempo laboral se pierde en coordinación repetitiva que Velo puede automatizar" data-en="of working time lost to repetitive coordination that Velo can automate">of working time lost to repetitive coordination that Velo can automate</p>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">4.8<sup>h</sup></div>
+      <p class="stat-label" data-es="promedio semanal por persona en follow-ups y status updates manuales" data-en="average weekly per person on manual follow-ups and status updates">average weekly per person on manual follow-ups and status updates</p>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">3<sup>×</sup></div>
+      <p class="stat-label" data-es="más rápido el onboarding de nuevos miembros con flujos automatizados desde el día uno" data-en="faster onboarding for new team members with automated flows from day one">faster onboarding for new team members with automated flows from day one</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-eyebrow" data-es="El problema" data-en="The problem">The problem</div>
+  <h2 class="section-headline" data-es="Equipos pequeños,<br>caos de empresa grande." data-en="Small teams,<br>big company chaos.">Small teams,<br>big company chaos.</h2>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-icon">⏱</div>
+      <p class="problem-title" data-es="La trampa de la zona horaria" data-en="The time zone trap">The time zone trap</p>
+      <p class="problem-desc">Waiting for someone to "get online" to make a decision. Every hour of waiting is momentum lost forever.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🔁</div>
+      <p class="problem-title" data-es="La dictadura de lo repetitivo" data-en="The repetition trap">The repetition trap</p>
+      <p class="problem-desc">Tasks that depend on someone remembering to do them. Until the day no one does. And the project stalls.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📨</div>
+      <p class="problem-title" data-es="El cementerio del contexto" data-en="The context graveyard">The context graveyard</p>
+      <p class="problem-desc">Critical information buried in Slack threads, unanswered emails, and documents nobody updates.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📈</div>
+      <p class="problem-title" data-es="Procesos que no escalan" data-en="Processes that don't scale">Processes that don't scale</p>
+      <p class="problem-desc">What worked with 5 people collapses at 12. And by the time you notice, you've already lost weeks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER COPY SHOWCASE -->
+<section id="copy-showcase">
+  <div class="showcase-inner">
+    <div class="section-eyebrow" data-es="Estrategia de copy" data-en="Copy strategy">Copy strategy</div>
+    <h2 class="section-headline reveal">This is what<br>the change looks like.</h2>
+
+    <div class="lang-bar reveal">
+      <span class="lang-label" data-es="Mercado" data-en="Market">Market</span>
+      <div class="lang-pills">
+        <button class="lang-pill active" onclick="setLang('es')">ES — LATAM</button>
+        <button class="lang-pill" onclick="setLang('en')">EN — Global</button>
+      </div>
+    </div>
+
+    <div class="copy-toggle reveal">
+      <button class="toggle-btn active" onclick="showPanel('landing', this)">Landing page</button>
+      <button class="toggle-btn" onclick="showPanel('email', this)">Email</button>
+      <button class="toggle-btn" onclick="showPanel('social', this)">Social</button>
+    </div>
+
+    <!-- Landing panel -->
+    <div class="copy-panel active" id="panel-landing">
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-red"></span>
+          <span>Before</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label" data-es="Versión original" data-en="Original version">Versión original</p>
+          <p class="copy-headline-old" data-es="Velo — La Plataforma para Equipos Modernos" data-en="Velo — The Platform for Modern Teams">Velo — La Plataforma para Equipos Modernos</p>
+          <p class="copy-sub-old" data-es="Optimiza tu flujo de trabajo, aumenta la productividad y colabora de forma más inteligente con nuestra solución todo-en-uno." data-en="Streamline your workflow, boost productivity, and collaborate smarter with our all-in-one solution.">Optimiza tu flujo de trabajo, aumenta la productividad y colabora de forma más inteligente con nuestra solución todo-en-uno.</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-problem">Problema</span>
+              <p class="annotation-text" data-es='"Equipos modernos" lo somos todos. No habla con nadie en concreto.' data-en='"Modern teams" is everyone. Which means no one.'>«Equipos modernos» lo somos todos. No habla con nadie en concreto.</p>
+            </div>
+            <div>
+              <span class="annotation-tag tag-problem">Problema</span>
+              <p class="annotation-text" data-es='"Todo-en-uno" es la frase más usada en SaaS. No diferencia ni convence.' data-en='"All-in-one solution" is the most overused phrase in SaaS. Zero differentiation.'>"Todo-en-uno" es la frase más usada en SaaS. No diferencia ni convence.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-green"></span>
+          <span>After</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label" data-es="Copy estratégico" data-en="Strategic copy">Copy estratégico</p>
+          <p class="copy-headline-new" data-es="Tu equipo no necesita estar conectado para avanzar." data-en="Your team doesn't need to be online at the same time to stay in sync.">Tu equipo no necesita estar conectado para avanzar.</p>
+          <p class="copy-sub-new" data-es="Velo automatiza los check-ins, handoffs y actualizaciones que frenan a startups distribuidas — para que tu equipo avance aunque nadie esté mirando." data-en="Velo automates the check-ins, handoffs, and status updates that slow down distributed startups — so your team moves fast, wherever they are.">Velo automatiza los check-ins, handoffs y actualizaciones que frenan a startups distribuidas — para que tu equipo avance aunque nadie esté mirando.</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-win">Decisión</span>
+              <p class="annotation-text" data-es='El headline nombra el dolor exacto. El lector se reconoce en la primera línea.' data-en='The headline names the exact pain. The reader recognizes themselves immediately.'>El headline nombra el dolor exacto. El lector se reconoce en la primera línea.</p>
+            </div>
+            <div>
+              <span class="annotation-tag tag-win">Decisión</span>
+              <p class="annotation-text" data-es='"Startups distribuidas" define la audiencia. No features, sino fricciones reales.' data-en='"Distributed startups" defines the audience. Not features — real friction points.'>"Startups distribuidas" define la audiencia. No features, sino fricciones reales.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email panel -->
+    <div class="copy-panel" id="panel-email">
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-red"></span>
+          <span>Before</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label">Original welcome email</p>
+          <p class="copy-headline-old" style="font-size:1rem; font-family: var(--font-mono); text-decoration:none; color:rgba(245,242,235,0.35)">Subject: Welcome to Velo</p>
+          <p class="copy-sub-old">Hola [Nombre],<br><br>Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión y comenzar a usar Velo.<br><br>— El equipo de Velo</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-problem">Problema</span>
+              <p class="annotation-text">Es una notificación de sistema disfrazada de email. Mata el momentum en el momento de mayor entusiasmo del usuario.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-green"></span>
+          <span>After</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label">Strategic email</p>
+          <p class="copy-headline-new" style="font-size:1rem; font-family:var(--font-mono); color:var(--accent);">Subject: You'll never have to remember again.</p>
+          <p class="copy-sub-new">Hola [Nombre],<br><br>Acabas de darle a tu equipo algo que ninguna reunión de status puede dar: tiempo de vuelta.<br><br>En los próximos 10 minutos, configura tu primer flujo automático y deja que Velo haga el trabajo de coordinación por ti.<br><br>Tu equipo lo va a notar desde hoy.</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-win">Decisión</span>
+              <p class="annotation-text">El asunto promete alivio inmediato. El cuerpo conecta la acción con el beneficio emocional: tiempo recuperado.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social panel -->
+    <div class="copy-panel" id="panel-social">
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-red"></span>
+          <span>Before</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label">Posts originales</p>
+          <p class="copy-headline-old" style="font-size:1rem; text-decoration:none;">🚀 Grandes cosas vienen. Pendientes.</p>
+          <p class="copy-sub-old" style="margin-top:1rem">✅ La productividad empieza con las herramientas correctas.<br><br>💡 Trabaja más inteligente, no más duro con Velo.</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-problem">Problema</span>
+              <p class="annotation-text">Platitudes decoradas con emojis. Sin punto de vista, sin audiencia, sin diferenciación. Podría ser cualquier marca.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copy-block">
+        <div class="copy-block-header">
+          <span class="dot dot-green"></span>
+          <span>After</span>
+        </div>
+        <div class="copy-block-body">
+          <p class="copy-version-label">Posts estratégicos</p>
+          <p class="copy-headline-new" style="font-size:1.3rem;">Tu equipo en Lisboa no debería esperar a que tú te despiertes en Bogotá para tomar una decisión.</p>
+          <p class="copy-sub-new" style="margin-top:1rem">Velo automatiza exactamente eso.<br><br>Los equipos distribuidos no necesitan más reuniones. Necesitan menos dependencias.</p>
+          <div class="copy-annotation">
+            <div>
+              <span class="annotation-tag tag-win">Decisión</span>
+              <p class="annotation-text">Nombra ciudades reales. Habla de una fricción específica. Tiene un punto de vista. Eso es una voz de marca.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-eyebrow" data-es="Cómo funciona" data-en="How it works">How it works</div>
+  <h2 class="section-headline reveal" data-es="Simple por diseño.<br>Poderoso por necesidad." data-en="Simple by design.<br>Powerful by necessity.">Simple by design.<br>Powerful by necessity.</h2>
+  <div class="how-grid">
+    <div class="how-step">
+      <span class="step-number">01</span>
+      <span class="step-badge" data-es="Día 1" data-en="Day 1">Day 1</span>
+      <p class="step-title" data-es="Conecta tu equipo en minutos" data-en="Connect your team in minutes">Connect your team in minutes</p>
+      <p class="step-desc">No ops manager, no 80-page manual. If you need to read instructions, something's wrong. Velo is ready when your team is.</p>
+    </div>
+    <div class="how-step">
+      <span class="step-number">02</span>
+      <span class="step-badge" data-es="Día 2" data-en="Day 2">Day 2</span>
+      <p class="step-title" data-es="Automatiza lo repetitivo" data-en="Automate the repetitive">Automate the repetitive</p>
+      <p class="step-desc">Check-ins, handoffs, status reminders. Everything that depends on someone remembering — Velo handles it automatically, without being asked.</p>
+    </div>
+    <div class="how-step">
+      <span class="step-number">03</span>
+      <span class="step-badge" data-es="Semana 1" data-en="Week 1">Week 1</span>
+      <p class="step-title" data-es="Tu equipo recupera tiempo real" data-en="Your team gets real time back">Your team gets real time back</p>
+      <p class="step-desc">Hours previously lost to coordination now go toward product, sales, and growth. That's how concrete the impact is.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section id="testimonial">
+  <blockquote class="testimonial-quote reveal">
+    "We didn't build Velo because we saw an opportunity.<br>
+    We built it because we <span>lost too many hours</span><br>
+    on things a machine should handle."
+  </blockquote>
+  <p class="testimonial-source" data-es="— Fundadores de Velo · Medellín, Colombia" data-en="— Velo founders · Medellín, Colombia">— Velo founders · Medellín, Colombia</p>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner">
+    <div class="section-eyebrow" style="justify-content:center" data-es="El siguiente paso" data-en="Next step">Next step</div>
+    <h2 class="cta-headline reveal">
+      Your team<br>
+      <span class="outline">can't afford</span><br>
+      to wait.
+    </h2>
+    <p class="cta-sub reveal">Try Velo free for 14 days. No credit card. No onboarding calls. Just your team working better from day one.</p>
+    <div class="cta-actions reveal">
+      <a href="#" class="btn-large dark" data-es="Empieza gratis — 14 días →" data-en="Start free — 14 days →">Start free — 14 days →</a>
+      <a href="#copy-showcase" class="btn-large outline" data-es="Ver el caso completo" data-en="View the full case">View the full case</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">VELO</span>
+  <span class="footer-note" data-es="Caso de estudio ficticio · Portfolio de copywriting" data-en="Spec work · Copywriting portfolio">Spec work · Copywriting portfolio</span>
+  <span class="footer-tag">LATAM → Global</span>
+</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// Nav scroll
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Three.js hero background — floating time nodes
+const canvas = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 0, 8);
+
+// Particle network — represents time nodes connecting across zones
+const particleCount = 120;
+const positions = new Float32Array(particleCount * 3);
+const velocities = [];
+
+for (let i = 0; i < particleCount; i++) {
+  positions[i * 3]     = (Math.random() - 0.5) * 20;
+  positions[i * 3 + 1] = (Math.random() - 0.5) * 14;
+  positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
+  velocities.push({
+    x: (Math.random() - 0.5) * 0.006,
+    y: (Math.random() - 0.5) * 0.004,
+    z: 0
+  });
+}
+
+const geo = new THREE.BufferGeometry();
+geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+const mat = new THREE.PointsMaterial({
+  color: 0x1a6b5a,
+  size: 0.08,
+  transparent: true,
+  opacity: 0.6,
+  sizeAttenuation: true
+});
+const points = new THREE.Points(geo, mat);
+scene.add(points);
+
+// Connecting lines between close particles
+const lineMat = new THREE.LineBasicMaterial({
+  color: 0x1a6b5a,
+  transparent: true,
+  opacity: 0.08
+});
+
+function buildLines() {
+  scene.children.filter(c => c.isLine).forEach(l => scene.remove(l));
+  const pos = geo.attributes.position.array;
+  for (let i = 0; i < particleCount; i++) {
+    for (let j = i + 1; j < particleCount; j++) {
+      const dx = pos[i*3] - pos[j*3];
+      const dy = pos[i*3+1] - pos[j*3+1];
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 3.5) {
+        const lineGeo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(pos[i*3], pos[i*3+1], pos[i*3+2]),
+          new THREE.Vector3(pos[j*3], pos[j*3+1], pos[j*3+2])
+        ]);
+        scene.add(new THREE.Line(lineGeo, lineMat));
+      }
+    }
+  }
+}
+
+// Mouse parallax
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', e => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 0.3;
+});
+
+let frame = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  frame++;
+  const pos = geo.attributes.position.array;
+  for (let i = 0; i < particleCount; i++) {
+    pos[i*3]   += velocities[i].x;
+    pos[i*3+1] += velocities[i].y;
+    if (Math.abs(pos[i*3]) > 10) velocities[i].x *= -1;
+    if (Math.abs(pos[i*3+1]) > 7) velocities[i].y *= -1;
+  }
+  geo.attributes.position.needsUpdate = true;
+  if (frame % 3 === 0) buildLines();
+
+  points.rotation.y += 0.0005;
+  camera.position.x += (mouseX - camera.position.x) * 0.04;
+  camera.position.y += (-mouseY - camera.position.y) * 0.04;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.reveal, .stat-item, .problem-card, .how-step');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, idx) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), idx * 80);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+revealEls.forEach(el => io.observe(el));
+
+// Copy panel toggle
+function showPanel(name, btn) {
+  document.querySelectorAll('.copy-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Localization toggle
+let currentLang = 'es';
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.toLowerCase().startsWith(lang));
+  });
+  const btnEs = document.getElementById('lnd-btn-es');
+  const btnEn = document.getElementById('lnd-btn-en');
+  if (btnEs) btnEs.classList.toggle('active', lang === 'es');
+  if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-es]').forEach(el => {
+    const val = el.dataset[lang] || el.dataset.es;
+    if (!val) return;
+    if (val.includes('<')) { el.innerHTML = val; } else { el.textContent = val; }
+  });
+}
+</script>
+</body>
+</html>

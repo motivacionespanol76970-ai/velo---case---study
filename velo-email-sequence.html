@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velo — Email Sequence: Before / After</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --accent: #c8f03d;
+    --teal: #1a6b5a;
+    --teal-light: #e0f5ef;
+    --muted: #7a7567;
+    --border: rgba(15,14,12,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--paper); color: var(--ink); }
+
+  /* HEADER */
+  .page-header {
+    background: var(--ink);
+    padding: 3rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+  }
+  .header-eyebrow {
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .header-eyebrow::before { content:''; display:inline-block; width:18px; height:1px; background:var(--accent); }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.92; letter-spacing: 0.02em; color: var(--paper);
+  }
+  .header-title span { color: var(--accent); }
+  .header-desc {
+    font-size: 0.875rem; line-height: 1.65;
+    color: rgba(245,242,235,0.5); font-weight: 300;
+    max-width: 360px; margin-top: 1.5rem;
+  }
+  .header-badge {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(200,240,61,0.1); color: var(--accent);
+    border: 1px solid rgba(200,240,61,0.2);
+    padding: 0.4rem 0.9rem; border-radius: 2px;
+  }
+
+  /* EMAIL NAVIGATION */
+  .email-nav {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 0 3rem;
+    display: flex; gap: 0;
+  }
+  .email-tab {
+    font-family: var(--font-mono); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 1rem 1.5rem; border: none; background: transparent;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .email-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+  .email-tab:hover { color: var(--ink); }
+
+  /* SEQUENCE MAP */
+  .sequence-map {
+    background: var(--ink);
+    padding: 1.5rem 3rem;
+    display: flex; align-items: center; gap: 0; overflow-x: auto;
+  }
+  .seq-step {
+    display: flex; align-items: center; gap: 0; flex-shrink: 0;
+  }
+  .seq-node {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; cursor: pointer; padding: 0 1rem;
+    transition: opacity 0.2s;
+  }
+  .seq-node:hover { opacity: 0.8; }
+  .seq-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(245,242,235,0.2);
+    border: 1.5px solid rgba(245,242,235,0.2);
+    transition: all 0.2s;
+  }
+  .seq-dot.active { background: var(--accent); border-color: var(--accent); }
+  .seq-label {
+    font-family: var(--font-mono); font-size: 0.58rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(245,242,235,0.35); text-align: center;
+    line-height: 1.3; max-width: 80px;
+  }
+  .seq-label.active { color: var(--accent); }
+  .seq-line {
+    width: 48px; height: 1px;
+    background: rgba(245,242,235,0.12);
+    flex-shrink: 0;
+  }
+  .seq-line.active { background: var(--accent); opacity: 0.4; }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 70vh;
+  }
+  .side {
+    padding: 3rem;
+    border-right: 1px solid var(--border);
+  }
+  .side:last-child { border-right: none; }
+  .side-label {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-family: var(--font-mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .side-label .indicator { width: 8px; height: 8px; border-radius: 50%; }
+  .before-label { color: #c0392b; }
+  .before-label .indicator { background: #e74c3c; }
+  .after-label { color: var(--teal); }
+  .after-label .indicator { background: #1D9E75; }
+
+  /* EMAIL CLIENT MOCKUP */
+  .email-client {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  /* Email chrome bar */
+  .email-chrome {
+    background: #f6f6f6;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .chrome-dots { display: flex; gap: 5px; }
+  .chrome-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .cd-red { background: #ff5f57; }
+  .cd-yellow { background: #ffbd2e; }
+  .cd-green { background: #28c840; }
+  .chrome-label {
+    font-size: 11px; color: #999;
+    letter-spacing: 0.02em; margin-left: 4px;
+  }
+
+  /* Email header fields */
+  .email-fields {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .email-field {
+    display: flex; align-items: baseline; gap: 10px;
+    font-size: 12px;
+  }
+  .field-label {
+    color: #999; min-width: 42px;
+    font-weight: 500; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .field-value { color: #333; }
+  .field-value.subject-bad {
+    color: #bbb; font-style: italic;
+    text-decoration: line-through;
+    text-decoration-color: #ddd;
+  }
+  .field-value.subject-good {
+    color: #0f0e0c; font-weight: 600; font-size: 13px;
+  }
+
+  /* Email body */
+  .email-body {
+    padding: 24px 24px 20px;
+    font-size: 14px; line-height: 1.7;
+    color: #2d2d2d;
+  }
+  .email-body.muted { color: #aaa; }
+  .email-body p { margin-bottom: 14px; }
+  .email-body p:last-child { margin-bottom: 0; }
+  .email-greeting { font-weight: 600; margin-bottom: 16px !important; }
+  .email-cta-btn {
+    display: inline-block;
+    background: #0f0e0c; color: #c8f03d;
+    padding: 10px 22px; border-radius: 3px;
+    font-size: 13px; font-weight: 600;
+    text-decoration: none; margin: 8px 0;
+    letter-spacing: 0.02em;
+  }
+  .email-cta-btn.muted-btn {
+    background: #e8e8e8; color: #888;
+  }
+  .email-signature {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 16px; margin-top: 16px;
+    font-size: 12px; color: #999; line-height: 1.6;
+  }
+  .email-list-bad {
+    list-style: none; padding: 0; margin: 10px 0;
+    color: #bbb;
+  }
+  .email-list-bad li::before { content: '— '; color: #ddd; }
+  .email-highlight {
+    background: rgba(200,240,61,0.15);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    margin: 12px 0;
+    font-size: 13px; font-style: italic;
+    color: #333;
+  }
+
+  /* Open rate indicator */
+  .open-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 1.5rem; padding: 1rem 1.25rem;
+    border-radius: 4px; border: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .open-label {
+    font-family: var(--font-mono); font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); white-space: nowrap;
+  }
+  .open-track {
+    flex: 1; height: 5px; background: var(--border);
+    border-radius: 99px; overflow: hidden;
+  }
+  .open-fill {
+    height: 100%; border-radius: 99px;
+    transition: width 1s ease;
+  }
+  .open-fill.bad { background: #e74c3c; width: 14%; }
+  .open-fill.good { background: #1D9E75; width: 61%; }
+  .open-pct {
+    font-family: var(--font-display); font-size: 1.4rem;
+    line-height: 1; min-width: 48px; text-align: right;
+  }
+  .open-pct.bad { color: #e74c3c; }
+  .open-pct.good { color: var(--teal); }
+
+  /* Subject line anatomy */
+  .subject-anatomy {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--ink);
+    border-radius: 4px;
+  }
+  .anatomy-label {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.75rem;
+  }
+  .anatomy-subject {
+    font-size: 1rem; font-weight: 500;
+    color: var(--paper); margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+  .anatomy-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .anatomy-tag {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px;
+  }
+  .atag-emotion { background: rgba(200,240,61,0.12); color: var(--accent); }
+  .atag-urgency { background: rgba(26,107,90,0.2); color: #5DCAA5; }
+  .atag-curiosity { background: rgba(175,169,236,0.15); color: #AFA9EC; }
+  .atag-specificity { background: rgba(240,153,123,0.15); color: #F0997B; }
+
+  /* Annotations */
+  .annotations { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.65rem; }
+  .annotation {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 0.875rem 1rem; border-radius: 4px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .annotation.visible { opacity: 1; transform: translateY(0); }
+  .annotation.problem { background: #fdf0ef; }
+  .annotation.win { background: var(--teal-light); }
+  .ann-tag {
+    font-family: var(--font-mono); font-size: 0.6rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 2px;
+    white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+  }
+  .ann-tag.problem { background: #fcd9d6; color: #922b21; }
+  .ann-tag.win { background: #9FE1CB; color: #085041; }
+  .ann-tag.local { background: rgba(175,169,236,0.2); color: #3C3489; }
+  .ann-text { font-size: 0.8rem; line-height: 1.55; color: var(--muted); font-weight: 300; }
+
+  /* INSIGHT STRIP */
+  .insight-strip {
+    background: var(--teal);
+    padding: 2rem 3rem;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .insight-text {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 0.95; letter-spacing: 0.02em;
+    color: var(--paper);
+  }
+  .insight-text span { color: var(--accent); }
+  .insight-note {
+    font-size: 0.85rem; color: rgba(245,242,235,0.6);
+    font-weight: 300; max-width: 300px; line-height: 1.6;
+  }
+
+  /* BOTTOM STATS */
+  .bottom-stats {
+    background: var(--ink); padding: 0;
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border-top: 1px solid rgba(245,242,235,0.06);
+  }
+  .bstat {
+    padding: 2rem; border-right: 1px solid rgba(245,242,235,0.06);
+    text-align: center;
+  }
+  .bstat:last-child { border-right: none; }
+  .bstat-val {
+    font-family: var(--font-display);
+    font-size: 2.5rem; line-height: 1;
+    color: var(--accent); margin-bottom: 0.4rem;
+  }
+  .bstat-label {
+    font-family: var(--font-mono); font-size: 0.62rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(245,242,235,0.3); line-height: 1.5;
+  }
+
+  /* Panel system */
+  .email-panel { display: none; }
+  .email-panel.active { display: contents; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .side { border-right: none; border-bottom: 1px solid var(--border); }
+    .bottom-stats { grid-template-columns: repeat(2,1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .email-nav, .sequence-map { padding: 0 1.5rem; }
+    .side { padding: 2rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+
+<!-- HEADER -->
+<header class="page-header">
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem;"><div class="header-eyebrow" data-es="Fase 02 · Parte II · Velo Case Study" data-en="Phase 02 · Part II · Velo Case Study">Phase 02 · Part II · Velo Case Study</div><div class="lang-bar"><button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button><button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button></div></div>
+    <h1 class="header-title">Secuencia<br>de <span>Email.</span></h1>
+    <p class="header-desc">Three critical moments. The subject line nobody opens vs. the one you can't ignore. The email that kills momentum vs. the one that ignites it.</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0.75rem;align-self:flex-end">
+    <span class="header-badge" data-es="3 emails · Bienvenida → Activación → Reenganche" data-en="3 emails · Welcome → Activation → Re-engagement">3 emails · Welcome → Activation → Re-engagement</span>
+    <span class="header-badge" style="color:rgba(245,242,235,0.35);background:transparent;border-color:rgba(245,242,235,0.08);">B2B SaaS · LATAM</span>
+  </div>
+</header>
+
+<!-- SEQUENCE MAP -->
+<div class="sequence-map">
+  <div class="seq-step">
+    <div class="seq-node" onclick="showEmail('e1',this,0)">
+      <div class="seq-dot active" id="dot0"></div>
+      <div class="seq-label active" id="lbl0" data-es="Día 0" data-en="Day 0">Day 0<br data-es="Bienvenida" data-en="Welcome">Welcome</div>
+    </div>
+  </div>
+  <div class="seq-line active" id="line0"></div>
+  <div class="seq-step">
+    <div class="seq-node" onclick="showEmail('e2',this,1)">
+      <div class="seq-dot" id="dot1"></div>
+      <div class="seq-label" id="lbl1" data-es="Día 3" data-en="Day 3">Day 3<br data-es="Activación" data-en="Activation">Activation</div>
+    </div>
+  </div>
+  <div class="seq-line" id="line1"></div>
+  <div class="seq-step">
+    <div class="seq-node" onclick="showEmail('e3',this,2)">
+      <div class="seq-dot" id="dot2"></div>
+      <div class="seq-label" id="lbl2" data-es="Día 7" data-en="Day 7">Day 7<br data-es="Reenganche" data-en="Re-engagement">Re-engagement</div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL NAVIGATION -->
+<nav class="email-nav">
+  <button class="email-tab active" onclick="showEmail('e1',this,0)" data-es="Email 01 — Bienvenida" data-en="Email 01 — Welcome">Email 01 — Welcome</button>
+  <button class="email-tab" onclick="showEmail('e2',this,1)" data-es="Email 02 — Activación" data-en="Email 02 — Activation">Email 02 — Activation</button>
+  <button class="email-tab" onclick="showEmail('e3',this,2)" data-es="Email 03 — Reenganche" data-en="Email 03 — Re-engagement">Email 03 — Re-engagement</button>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- EMAIL 1 -->
+  <div class="email-panel active" id="e1">
+    <div class="side">
+      <div class="side-label before-label"><span class="indicator"></span data-es="Antes — notificación de sistema" data-en="Before — system notification">Before — system notification</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0769682a7562776b7e4771626b68296e68">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2653555347544f4966555247545253560845494b">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-bad">Bienvenido a Velo</span></div>
+        </div>
+        <div class="email-body muted">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión y comenzar a usar Velo.</p>
+          <p>Here are some things you can do:</p>
+          <ul class="email-list-bad">
+            <li>Create your first workspace</li>
+            <li>Invite your team</li>
+            <li>Explore our features</li>
+          </ul>
+          <p>If you have any questions, contact us at <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95e6fae5fae7e1f0d5e3f0f9fabbfcfa">[email&#160;protected]</a></p>
+          <div class="email-signature">The Velo team</div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de apertura" data-en="Open rate">Open rate</span>
+        <div class="open-track"><div class="open-fill bad"></div></div>
+        <span class="open-pct bad">14%</span>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"no-reply@" as sender says: we don't care what you think. It destroys the relationship before it starts.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"Welcome to Velo" as a subject line is invisible in an inbox. There's no reason to open it.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">The user just signed up — they're at peak enthusiasm. This email kills it completely.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="side-label after-label"><span class="indicator"></span data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value">Camila de Velo &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4122202c282d200137242d2e6f282e">[email&#160;protected]</a>&gt;</span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bacfc9cfdbc8d3d5fac9cedbc8cecfca94d9d5d7">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-good">Ya no tienes que recordar nada.</span></div>
+        </div>
+        <div class="email-body">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Acabas de darle a tu equipo algo que ninguna reunión de status puede dar: <strong>tiempo de vuelta.</strong></p>
+          <div class="email-highlight">In the next 10 minutes, set up your first automated flow. Let Velo handle the coordination. You focus on what matters.</div>
+          <p>→ <a href="#" style="color:#1a6b5a;font-weight:500;">Configura tu primer flujo automático</a></p>
+          <p style="font-size:13px;color:#888;margin-top:4px;">Takes 8 minutes. No manual. No onboarding call.</p>
+          <p>Your team will notice from today.</p>
+          <div class="email-signature">
+            Camila<br>
+            <span style="color:#bbb">Velo Team · Medellín, Colombia</span><br>
+            <span style="color:#bbb;font-size:11px;">P.S. — If you ever have a question, reply to this email. I read them.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de apertura" data-en="Open rate">Open rate</span>
+        <div class="open-track"><div class="open-fill good"></div></div>
+        <span class="open-pct good">61%</span>
+      </div>
+
+      <div class="subject-anatomy">
+        <div class="anatomy-label" data-es="Anatomía del asunto" data-en="Subject line anatomy">Subject line anatomy</div>
+        <div class="anatomy-subject">"Ya no tienes que recordar nada."</div>
+        <div class="anatomy-tags">
+          <span class="anatomy-tag atag-emotion" data-es="Alivio emocional" data-en="Emotional relief">Emotional relief</span>
+          <span class="anatomy-tag atag-curiosity" data-es="Genera curiosidad" data-en="Builds curiosity">Builds curiosity</span>
+          <span class="anatomy-tag atag-specificity" data-es="Promesa concreta" data-en="Concrete promise">Concrete promise</span>
+        </div>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">Human name sender + personalized email. "Camila at Velo" generates 3x more opens than a no-reply.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">The CTA has zero friction: "8 minutes, no manual." It eliminates the time excuse before it even appears.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win">Localización</span>
+          <p class="ann-text">"Medellín, Colombia" in the signature activates regional LATAM pride. For a Colombian or Mexican founder, it's a trust signal.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-panel" id="e2">
+    <div class="side">
+      <div class="side-label before-label"><span class="indicator"></span>Antes — recordatorio genérico</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dcb2b3f1aeb9acb0a59caab9b0b3f2b5b3">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b6c3c5c3d7c4dfd9f6c5c2d7c4c2c3c698d5d9db">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-bad">Recuerda completar tu perfil en Velo</span></div>
+        </div>
+        <div class="email-body muted">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Notamos que aún no has completado la configuración de tu cuenta en Velo.</p>
+          <p>To get the most out of our platform, we recommend:</p>
+          <ul class="email-list-bad">
+            <li>Complete your profile</li>
+            <li>Invite your team</li>
+            <li>Create your first project</li>
+          </ul>
+          <a href="#" class="email-cta-btn muted-btn">Complete setup</a>
+          <div class="email-signature">The Velo team</div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de apertura" data-en="Open rate">Open rate</span>
+        <div class="open-track"><div class="open-fill bad" style="width:9%"></div></div>
+        <span class="open-pct bad">9%</span>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"We noticed you haven't yet..." is surveillance language, not support. It creates discomfort, not action.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"Complete your profile" has no associated benefit. Why? This email doesn't answer that.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">Three generic bullets any SaaS on the planet could send. There's no reason this has to be Velo.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="side-label after-label"><span class="indicator"></span>Después — activación con contexto</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value">Camila de Velo &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bad9dbd7d3d6dbfaccdfd6d594d3d5">[email&#160;protected]</a>&gt;</span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c0b5b3b5a1b2a9af80b3b4a1b2b4b5b0eea3afad">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-good">¿Cuántas horas perdió tu equipo esta semana?</span></div>
+        </div>
+        <div class="email-body">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Te hago una pregunta directa:</p>
+          <p style="font-size:16px;font-weight:600;color:#0f0e0c;">How many hours did your team lose this week on things Velo should be handling automatically?</p>
+          <p>El promedio de startups de tu tamaño: <strong>4.8 horas por persona.</strong> In a team of 8, that's nearly 40 hours a week in coordination that generates no product.</p>
+          <div class="email-highlight">Teams that set up their first automated flow within 3 days recover an average of 6 hours per week from week one.</div>
+          <p>You've had 3 days. You're still in time.</p>
+          <a href="#" class="email-cta-btn">Set up my first flow →</a>
+          <p style="font-size:12px;color:#aaa;margin-top:8px;">Takes less than 10 minutes. You'll notice it Monday.</p>
+          <div class="email-signature">
+            Camila<br>
+            <span style="color:#bbb">Velo · If you have questions, reply here.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de apertura" data-en="Open rate">Open rate</span>
+        <div class="open-track"><div class="open-fill good" style="width:54%"></div></div>
+        <span class="open-pct good">54%</span>
+      </div>
+
+      <div class="subject-anatomy">
+        <div class="anatomy-label" data-es="Anatomía del asunto" data-en="Subject line anatomy">Subject line anatomy</div>
+        <div class="anatomy-subject">"¿Cuántas horas perdió tu equipo esta semana?"</div>
+        <div class="anatomy-tags">
+          <span class="anatomy-tag atag-curiosity" data-es="Pregunta directa" data-en="Direct question">Direct question</span>
+          <span class="anatomy-tag atag-urgency" data-es="Urgencia implícita" data-en="Implicit urgency">Implicit urgency</span>
+          <span class="anatomy-tag atag-specificity" data-es="Dato concreto" data-en="Concrete data">Concrete data</span>
+        </div>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">The subject question activates the reader's mind before they open it. They arrive curious, not obligated.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">"4.8 hours per person" turns abstract pain into a number the founder can calculate for their own team.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">"You've had 3 days. You're still in time." Creates urgency without pressure. It's a fact, not a threat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-panel" id="e3">
+    <div class="side">
+      <div class="side-label before-label"><span class="indicator"></span>Antes — último aviso</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7d1312500f180d11043d0b181112531412">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="96e3e5e3f7e4fff9d6e5e2f7e4e2e3e6b8f5f9fb">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-bad">Tu período de prueba está por vencer</span></div>
+        </div>
+        <div class="email-body muted">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Tu período de prueba de 14 días está por terminar.</p>
+          <p>To continue using all Velo features, upgrade your plan before your free trial expires.</p>
+          <a href="#" class="email-cta-btn muted-btn">View plans and pricing</a>
+          <p style="font-size:12px;color:#ccc;margin-top:12px;">Si no actualizas, perderás acceso a tu cuenta.</p>
+          <div class="email-signature">The Velo team</div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de conversión" data-en="Conversion rate">Conversion rate</span>
+        <div class="open-track"><div class="open-fill bad" style="width:5%"></div></div>
+        <span class="open-pct bad">2%</span>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"You'll lose access to your account" is pure threat. For a user who never activated, it generates churn, not conversion.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">There's no attempt to understand why the user didn't activate. The email completely ignores the reader's context.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text">"See plans and pricing" as a CTA sends the user to the coldest point in the funnel with zero warm-up.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="side-label after-label"><span class="indicator"></span>Después — reenganche humano</div>
+      <div class="email-client">
+        <div class="email-chrome">
+          <div class="chrome-dots"><span class="chrome-dot cd-red"></span><span class="chrome-dot cd-yellow"></span><span class="chrome-dot cd-green"></span></div>
+          <span class="chrome-label" data-es="Bandeja de entrada" data-en="Inbox">Inbox</span>
+        </div>
+        <div class="email-fields">
+          <div class="email-field"><span class="field-label">De</span><span class="field-value">Camila de Velo &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d2b1b3bfbbbeb392a4b7bebdfcbbbd">[email&#160;protected]</a>&gt;</span></div>
+          <div class="email-field"><span class="field-label">Para</span><span class="field-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6e1b1d1b0f1c07012e1d1a0f1c1a1b1e400d0103">[email&#160;protected]</a></span></div>
+          <div class="email-field"><span class="field-label">Asunto</span><span class="field-value subject-good">¿Te fallamos en algo?</span></div>
+        </div>
+        <div class="email-body">
+          <p class="email-greeting">Hola [Nombre],</p>
+          <p>Llevas una semana con Velo y todavía no configuraste tu primer flujo automático.</p>
+          <p>And I'm wondering if that's on us.</p>
+          <p>Was the tool hard to understand? Couldn't find the right use case for your team? Or did you just not have 10 minutes?</p>
+          <div class="email-highlight">Reply to this email with one word: "hard", "confusing", "time" or "not relevant". I'll personally help you figure it out.</div>
+          <p>And if you want to continue, here's the open door:</p>
+          <a href="#" class="email-cta-btn">Activate Velo now — 7 days left →</a>
+          <p style="font-size:12px;color:#aaa;margin-top:8px;">No card. No commitment. Just your team working better.</p>
+          <div class="email-signature">
+            Camila<br>
+            <span style="color:#bbb">Velo · I wrote this email myself. Not a bot.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="open-bar">
+        <span class="open-label" data-es="Tasa de conversión" data-en="Conversion rate">Conversion rate</span>
+        <div class="open-track"><div class="open-fill good" style="width:38%"></div></div>
+        <span class="open-pct good">38%</span>
+      </div>
+
+      <div class="subject-anatomy">
+        <div class="anatomy-label" data-es="Anatomía del asunto" data-en="Subject line anatomy">Subject line anatomy</div>
+        <div class="anatomy-subject">"¿Te fallamos en algo?"</div>
+        <div class="anatomy-tags">
+          <span class="anatomy-tag atag-emotion" data-es="Vulnerabilidad de marca" data-en="Brand vulnerability">Brand vulnerability</span>
+          <span class="anatomy-tag atag-curiosity">Genera apertura</span>
+          <span class="anatomy-tag atag-urgency">Inversión del ego</span>
+        </div>
+      </div>
+
+      <div class="annotations">
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">"¿Te fallamos en algo?" es el asunto de reenganche con mayor tasa de apertura en SaaS. La marca asume responsabilidad — eso es disruptivo.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text">Pedir una respuesta de una sola palabra reduce la fricción al mínimo absoluto y genera datos reales sobre por qué los usuarios no activan.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win">Localización</span>
+          <p class="ann-text">"Este email lo escribí yo, no un bot" es una señal cultural clave en LATAM: la calidez personal genera confianza más que cualquier feature.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- INSIGHT STRIP -->
+<div class="insight-strip">
+  <div class="insight-text">
+    Un asunto<br>lo es <span>todo.</span>
+  </div>
+  <p class="insight-note">El 47% de los destinatarios decide abrir o ignorar un email basándose únicamente en el asunto. Todo el copy del cuerpo depende de que ese primer trabajo esté bien hecho.</p>
+</div>
+
+<!-- BOTTOM STATS -->
+<div class="bottom-stats">
+  <div class="bstat">
+    <div class="bstat-val">4.3×</div>
+    <div class="bstat-label">Más tasa de apertura<br>con asuntos estratégicos</div>
+  </div>
+  <div class="bstat">
+    <div class="bstat-val">19×</div>
+    <div class="bstat-label">Más conversión en email<br>de reenganche humano</div>
+  </div>
+  <div class="bstat">
+    <div class="bstat-val">0</div>
+    <div class="bstat-label">Emails enviados desde<br>no-reply en el after</div>
+  </div>
+  <div class="bstat">
+  

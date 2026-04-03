@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velo — Onboarding Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0c;
+  --paper: #f5f2eb;
+  --cream: #ede9df;
+  --accent: #c8f03d;
+  --teal: #1a6b5a;
+  --teal-light: #e0f5ef;
+  --muted: #7a7567;
+  --border: rgba(15,14,12,0.1);
+  --red: #e74c3c;
+  --red-light: #fdf0ef;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* HEADER */
+.page-header{background:var(--ink);padding:3rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.header-eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;display:flex;align-items:center;gap:.6rem;}
+.header-eyebrow::before{content:'';display:inline-block;width:18px;height:1px;background:var(--accent);}
+.header-title{font-family:var(--font-display);font-size:clamp(3rem,6vw,5.5rem);line-height:.92;letter-spacing:.02em;color:var(--paper);}
+.header-title span{color:var(--accent);}
+.header-desc{font-size:.875rem;line-height:1.65;color:rgba(245,242,235,.5);font-weight:300;max-width:380px;margin-top:1.5rem;}
+.header-right{display:flex;flex-direction:column;gap:.75rem;align-self:flex-end;}
+.header-badge{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(200,240,61,.1);color:var(--accent);border:1px solid rgba(200,240,61,.2);padding:.4rem .9rem;border-radius:2px;}
+
+/* MODE SWITCHER */
+.mode-bar{background:var(--cream);border-bottom:1px solid var(--border);padding:1.25rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.mode-label{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.mode-pills{display:flex;gap:4px;}
+.mode-pill{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.5rem 1.25rem;border-radius:2px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;}
+.mode-pill.before-active{background:var(--red);color:#fff;border-color:var(--red);}
+.mode-pill.after-active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.friction-meter{display:flex;align-items:center;gap:.75rem;}
+.friction-label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.friction-track{width:160px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.friction-fill{height:100%;border-radius:99px;transition:width .8s ease,background .8s ease;}
+
+/* MAIN SIMULATOR AREA */
+.simulator{display:grid;grid-template-columns:1fr 380px;min-height:70vh;}
+
+/* ONBOARDING SCREEN */
+.onboard-screen{padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:background .5s ease;}
+.onboard-screen.before-mode{background:#f9f9f9;}
+.onboard-screen.after-mode{background:var(--paper);}
+
+.screen-wrap{width:100%;max-width:480px;}
+
+/* Progress bar */
+.progress-bar{display:flex;align-items:center;gap:.5rem;margin-bottom:2.5rem;}
+.progress-step{height:4px;flex:1;border-radius:99px;background:#e0e0e0;transition:background .4s ease;}
+.progress-step.done{background:var(--teal);}
+.progress-step.done-bad{background:#ddd;}
+.progress-text{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+
+/* Step content */
+.step-content{animation:stepIn .35s ease;}
+@keyframes stepIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+.step-tag{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .8rem;border-radius:2px;margin-bottom:1.25rem;display:inline-block;}
+.step-tag.bad{background:#fdf0ef;color:#922b21;}
+.step-tag.good{background:var(--teal-light);color:var(--teal);}
+
+.step-title{font-size:1.5rem;font-weight:500;line-height:1.2;margin-bottom:.75rem;color:var(--ink);}
+.step-title.bad-title{color:#555;font-weight:400;}
+.step-subtitle{font-size:.875rem;line-height:1.65;color:var(--muted);font-weight:300;margin-bottom:2rem;}
+.step-subtitle.bad-sub{color:#bbb;}
+
+/* Form fields */
+.field-group{margin-bottom:1.25rem;}
+.field-label{font-size:.75rem;font-weight:500;color:var(--muted);margin-bottom:.4rem;display:block;letter-spacing:.02em;}
+.field-label.bad-label{color:#ccc;font-size:.7rem;}
+.field-input{width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:3px;background:white;font-family:var(--font-body);font-size:.9rem;color:var(--ink);transition:border-color .2s,box-shadow .2s;outline:none;}
+.field-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(26,107,90,.1);}
+.field-input.bad-input{border-color:#e8e8e8;background:#fafafa;color:#ccc;}
+.field-input.bad-input:focus{border-color:#ccc;box-shadow:none;}
+.field-hint{font-size:.72rem;color:var(--muted);margin-top:.35rem;line-height:1.4;}
+.field-hint.bad-hint{color:#ddd;}
+.field-hint.good-hint{color:var(--teal);}
+
+/* Radio options */
+.radio-group{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;}
+.radio-opt{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all .2s;background:white;}
+.radio-opt:hover{border-color:var(--teal);background:var(--teal-light);}
+.radio-opt.selected{border-color:var(--teal);background:var(--teal-light);}
+.radio-opt.bad-opt{border-color:#eee;background:#fafafa;}
+.radio-opt.bad-opt:hover{border-color:#ddd;background:#f5f5f5;}
+.radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.radio-opt.selected .radio-dot{border-color:var(--teal);background:var(--teal);}
+.radio-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:white;opacity:0;transition:opacity .2s;}
+.radio-opt.selected .radio-dot::after{opacity:1;}
+.radio-text{font-size:.875rem;color:var(--ink);}
+.radio-text.bad-rtext{color:#bbb;}
+
+/* CTA button */
+.step-cta{width:100%;padding:.9rem;border:none;border-radius:3px;font-family:var(--font-body);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:.02em;}
+.step-cta.good-cta{background:var(--teal);color:white;}
+.step-cta.good-cta:hover{background:#0f4f3c;transform:translateY(-1px);}
+.step-cta.bad-cta{background:#e0e0e0;color:#aaa;}
+.step-cta.bad-cta:hover{background:#d8d8d8;}
+.step-skip{display:block;text-align:center;font-size:.75rem;color:#ccc;margin-top:.75rem;cursor:pointer;text-decoration:underline;}
+.step-skip.good-skip{color:var(--muted);}
+
+/* Microcopy note */
+.microcopy-note{font-size:.75rem;text-align:center;margin-top:.6rem;}
+.microcopy-note.bad-note{color:#ddd;}
+.microcopy-note.good-note{color:var(--muted);}
+
+/* SUCCESS SCREEN */
+.success-screen{text-align:center;padding:2rem 0;}
+.success-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1.5rem;}
+.success-icon.bad-icon{background:#f5f5f5;}
+.success-icon.good-icon{background:var(--teal-light);}
+.success-title{font-size:1.4rem;font-weight:500;margin-bottom:.5rem;}
+.success-title.bad-stitle{color:#888;font-weight:400;}
+.success-title.good-stitle{color:var(--ink);}
+.success-sub{font-size:.875rem;line-height:1.65;margin-bottom:2rem;}
+.success-sub.bad-ssub{color:#ccc;}
+.success-sub.good-ssub{color:var(--muted);}
+
+/* SIDEBAR — annotations */
+.sidebar{background:var(--ink);padding:2.5rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem;}
+.sidebar-title{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,242,235,.3);margin-bottom:.25rem;}
+.annotation-card{background:rgba(245,242,235,.04);border:1px solid rgba(245,242,235,.08);border-radius:4px;padding:1rem 1.25rem;transition:all .3s ease;}
+.annotation-card.highlight{background:rgba(200,240,61,.06);border-color:rgba(200,240,61,.15);}
+.ann-card-tag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;margin-bottom:.6rem;display:inline-block;}
+.ann-card-tag.problem{background:rgba(231,76,60,.15);color:#ff9591;}
+.ann-card-tag.win{background:rgba(200,240,61,.12);color:var(--accent);}
+.ann-card-tag.micro{background:rgba(175,169,236,.12);color:#AFA9EC;}
+.ann-card-text{font-size:.8rem;line-height:1.55;color:rgba(245,242,235,.55);font-weight:300;}
+.ann-element{font-family:var(--font-mono);font-size:.7rem;color:rgba(245,242,235,.25);margin-bottom:.4rem;display:block;}
+
+/* BOTTOM COMPARISON */
+.bottom-compare{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);}
+.compare-side{padding:2.5rem 3rem;}
+.compare-side.before-side{background:#fdf0ef;border-right:1px solid var(--border);}
+.compare-side.after-side{background:var(--teal-light);}
+.compare-label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;}
+.compare-label.bl{color:#922b21;}
+.compare-label.al{color:var(--teal);}
+.compare-label .dot{width:7px;height:7px;border-radius:50%;}
+.compare-label.bl .dot{background:var(--red);}
+.compare-label.al .dot{background:var(--teal);}
+.compare-metric{margin-bottom:.875rem;}
+.compare-key{font-size:.78rem;color:var(--muted);margin-bottom:.2rem;}
+.compare-val{font-family:var(--font-display);font-size:2rem;line-height:1;}
+.compare-val.bad-val{color:#e74c3c;}
+.compare-val.good-val{color:var(--teal);}
+
+/* FINAL STRIP */
+.final-strip{background:var(--ink);padding:2.5rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.final-quote{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.8rem);line-height:.95;letter-spacing:.02em;color:var(--paper);}
+.final-quote span{color:var(--accent);}
+.final-note{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,242,235,.25);}
+
+@media(max-width:900px){
+  .simulator{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .bottom-compare{grid-template-columns:1fr;}
+  .compare-side.before-side{border-right:none;border-bottom:1px solid var(--border);}
+  .mode-bar{padding:1rem 1.5rem;}
+  .onboard-screen{padding:2.5rem 1.5rem;}
+  .page-header{padding:2rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+
+<!-- HEADER -->
+<header class="page-header">
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;"><div class="header-eyebrow" data-es="Fase 03 · Cierre del Case Study · Velo" data-en="Phase 03 · Case Study Closing · Velo">Phase 03 · Case Study Closing · Velo</div><div class="lang-bar"><button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button><button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button></div></div>
+    <h1 class="header-title">Simulador de<br><span>Onboarding.</span></h1>
+    <p class="header-desc" data-es="Navega el mismo flujo dos veces. Una con el copy original. Otra con el copy estratégico. Siente la diferencia — no la leas." data-en="Navigate the same flow twice. Once with the original copy. Once with the strategic copy. Feel the difference — don't just read it.">Navigate the same flow twice. Once with the original copy. Once with the strategic copy. Feel the difference — don't just read it.</p>
+  </div>
+  <div class="header-right">
+    <span class="header-badge" data-es="Experiencia interactiva" data-en="Interactive experience">Interactive experience</span>
+    <span class="header-badge" style="color:rgba(245,242,235,.3);background:transparent;border-color:rgba(245,242,235,.08);" data-es="Microcopy · UX · Fricción" data-en="Microcopy · UX · Friction">Microcopy · UX · Friction</span>
+  </div>
+</header>
+
+<!-- MODE SWITCHER -->
+<div class="mode-bar">
+  <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+    <span class="mode-label" data-es="Modo de visualización" data-en="Display mode">Display mode</span>
+    <div class="mode-pills">
+      <button class="mode-pill before-active" id="btn-before" onclick="setMode('before')" data-es="Antes — copy original" data-en="Before — original copy">Before — original copy</button>
+      <button class="mode-pill" id="btn-after" onclick="setMode('after')" data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</button>
+    </div>
+  </div>
+  <div class="friction-meter">
+    <span class="friction-label" data-es="Fricción percibida" data-en="Perceived friction">Perceived friction</span>
+    <div class="friction-track">
+      <div class="friction-fill" id="friction-fill" style="width:85%;background:#e74c3c;"></div>
+    </div>
+    <span id="friction-pct" style="font-family:var(--font-display);font-size:1.2rem;color:#e74c3c;min-width:42px;text-align:right;" data-es="Alta" data-en="High">High</span>
+  </div>
+</div>
+
+<!-- SIMULATOR -->
+<div class="simulator">
+  <div class="onboard-screen before-mode" id="onboard-screen">
+    <div class="screen-wrap" id="screen-wrap">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div>
+      <div class="sidebar-title" data-es="Análisis de microcopy" data-en="Microcopy analysis">Microcopy analysis</div>
+    </div>
+    <div id="ann-cards">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM COMPARISON -->
+<div class="bottom-compare">
+  <div class="compare-side before-side">
+    <div class="compare-label bl"><span class="dot"></span data-es="Antes — copy original" data-en="Before — original copy">Before — original copy</div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Tiempo promedio de activación" data-en="Average activation time">Average activation time</div>
+      <div class="compare-val bad-val">11.4 min</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Tasa de abandono en onboarding" data-en="Onboarding dropout rate">Onboarding dropout rate</div>
+      <div class="compare-val bad-val">67%</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Usuarios que completan el flujo" data-en="Users who complete the flow">Users who complete the flow</div>
+      <div class="compare-val bad-val">33%</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Fricción percibida (1–10)" data-en="Perceived friction (1–10)">Perceived friction (1–10)</div>
+      <div class="compare-val bad-val">8.2</div>
+    </div>
+  </div>
+  <div class="compare-side after-side">
+    <div class="compare-label al"><span class="dot"></span data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Tiempo promedio de activación" data-en="Average activation time">Average activation time</div>
+      <div class="compare-val good-val">3.8 min</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Tasa de abandono en onboarding" data-en="Onboarding dropout rate">Onboarding dropout rate</div>
+      <div class="compare-val good-val">18%</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Usuarios que completan el flujo" data-en="Users who complete the flow">Users who complete the flow</div>
+      <div class="compare-val good-val">82%</div>
+    </div>
+    <div class="compare-metric">
+      <div class="compare-key" data-es="Fricción percibida (1–10)" data-en="Perceived friction (1–10)">Perceived friction (1–10)</div>
+      <div class="compare-val good-val">2.1</div>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL STRIP -->
+<div class="final-strip">
+  <div class="final-quote">El copy no decora<br>la experiencia.<br><span>Es la experiencia.</span></div>
+  <div class="final-note">Velo Case Study · Strategic Copywriting Portfolio · LATAM → Global</div>
+</div>
+
+<script>
+let currentMode = 'before';
+let currentStep = 0;
+let selectedOpt = null;
+
+const steps = {
+  before: [
+    {
+      tag: { text: 'Paso 1 de 4', cls: 'bad' },
+      title: { text: 'Configuración inicial', cls: 'bad-title' },
+      subtitle: { text: 'Complete los campos requeridos para continuar.', cls: 'bad-sub' },
+      fields: [
+        { label: 'Nombre de la empresa *', cls: 'bad-label', inputCls: 'bad-input', hint: '', hintCls: '' },
+        { label: 'Número de empleados *', cls: 'bad-label', inputCls: 'bad-input', hint: '', hintCls: '' },
+      ],
+      cta: { text: 'Continue', cls: 'bad-cta' },
+      skip: { text: 'Skip este paso', cls: '' },
+      microcopy: { text: '* Campos obligatorios', cls: 'bad-note' },
+      annotations: [
+        { tag: 'problem', el: 'Título', text: '"Configuración inicial" no dice nada sobre lo que el usuario va a ganar. Es burocrático, no motivador.' },
+        { tag: 'problem', el: 'Subtítulo', text: '"Complete los campos requeridos" habla de obligación, no de valor. El usuario siente que está llenando un formulario, no empezando algo.' },
+        { tag: 'problem', el: 'Microcopy', text: 'El asterisco de "campos obligatorios" como primera interacción activa el modo resistencia. El usuario se siente controlado.' }
+      ]
+    },
+    {
+      tag: { text: 'Paso 2 de 4', cls: 'bad' },
+      title: { text: 'Seleccione su industria', cls: 'bad-title' },
+      subtitle: { text: 'Esta información nos ayuda a personalizar su experiencia.', cls: 'bad-sub' },
+      options: ['Tecnología', 'Servicios', 'Comercio', 'Educación', 'Otro'],
+      optCls: 'bad-opt',
+      textCls: 'bad-rtext',
+      cta: { text: 'Next', cls: 'bad-cta' },
+      skip: { text: 'No sé / Skip', cls: '' },
+      microcopy: { text: '', cls: '' },
+      annotations: [
+        { tag: 'problem', el: 'Título', text: '"Seleccione su industria" es lenguaje de formulario gubernamental. Frío, imperativo, sin contexto.' },
+        { tag: 'problem', el: 'Opciones', text: 'Las opciones son tan genéricas que ninguna describe realmente a una startup distribuida. El usuario no se reconoce en ninguna.' },
+        { tag: 'problem', el: 'Subtítulo', text: '"Esta información nos ayuda a nosotros" — el beneficio está invertido. El usuario quiere saber qué gana él, no qué ganamos nosotros.' }
+      ]
+    },
+    {
+      tag: { text: 'Paso 3 de 4', cls: 'bad' },
+      title: { text: 'Invitar miembros del equipo', cls: 'bad-title' },
+      subtitle: { text: 'Agregue las direcciones de correo electrónico de los miembros de su equipo.', cls: 'bad-sub' },
+      fields: [
+        { label: 'Correo electrónico', cls: 'bad-label', inputCls: 'bad-input', hint: 'Separe múltiples correos con comas', hintCls: 'bad-hint' },
+      ],
+      cta: { text: 'Enviar invitaciones', cls: 'bad-cta' },
+      skip: { text: 'Hacer esto después', cls: '' },
+      microcopy: { text: '', cls: '' },
+      annotations: [
+        { tag: 'problem', el: 'Título', text: 'Pedir que invites a tu equipo en el paso 3 es prematuro. El usuario no ha visto el valor del producto todavía. ¿Por qué lo iba a compartir?' },
+        { tag: 'problem', el: 'Campo', text: '"Separe múltiples correos con comas" — instrucción técnica innecesaria. El diseño debería resolver esto, no el usuario.' },
+        { tag: 'problem', el: 'Skip', text: '"Hacer esto después" como escape activa la procrastinación. La mayoría nunca vuelve.' }
+      ]
+    },
+    {
+      tag: { text: 'Paso 4 de 4', cls: 'bad' },
+      title: { text: 'Configuración completada', cls: 'bad-title' },
+      subtitle: { text: 'Su cuenta ha sido configurada. Puede comenzar a usar Velo.', cls: 'bad-sub' },
+      success: true,
+      successCls: 'bad-icon',
+      successIcon: '✓',
+      successTitleCls: 'bad-stitle',
+      successSubCls: 'bad-ssub',
+      cta: { text: 'Ir al dashboard', cls: 'bad-cta' },
+      microcopy: { text: '', cls: '' },
+      annotations: [
+        { tag: 'problem', el: 'Título', text: '"Configuración completada" celebra el proceso, no al usuario. Es el equivalente a decir "formulario enviado".' },
+        { tag: 'problem', el: 'Subtítulo', text: '"Puede comenzar a usar Velo" no le dice qué hacer primero. El usuario queda solo frente a un dashboard vacío.' },
+        { tag: 'problem', el: 'CTA', text: '"Ir al dashboard" es el destino más genérico posible. No hay momentum, no hay siguiente acción clara, no hay sensación de progreso.' }
+      ]
+    }
+  ],
+  after: [
+    {
+      tag: { text: 'Un paso rápido', cls: 'good' },
+      title: { text: 'Cuéntanos cómo se llama tu equipo.', cls: '' },
+      subtitle: { text: 'Solo necesitamos esto para que todo lo demás tenga sentido desde el primer día.', cls: '' },
+      fields: [
+        { label: '¿Cómo se llama tu startup?', cls: '', inputCls: '', hint: 'Así aparecerá en tus flujos y notificaciones', hintCls: 'good-hint' },
+        { label: '¿Cuántas personas en el equipo hoy?', cls: '', inputCls: '', hint: 'Puedes cambiar esto cuando crezcas', hintCls: 'good-hint' },
+      ],
+      cta: { text: 'Eso es todo por ahora →', cls: 'good-cta' },
+      skip: { text: 'Prefiero explorar primero', cls: 'good-skip' },
+      microcopy: { text: 'Sin formularios eternos. Solo lo esencial.', cls: 'good-note' },
+      annotations: [
+        { tag: 'win', el: 'Título', text: '"Cuéntanos cómo se llama tu equipo" es una conversación, no un formulario. El tono cálido reduce la resistencia antes de que aparezca.' },
+        { tag: 'win', el: 'Subtítulo', text: '"Para que todo lo demás tenga sentido" conecta la acción con un beneficio inmediato. El usuario entiende el por qué antes de actuar.' },
+        { tag: 'micro', el: 'Microcopy campo', text: '"Puedes cambiar esto cuando crezcas" — anticipa la objeción de compromiso. El usuario se siente libre, no atrapado.' }
+      ]
+    },
+    {
+      tag: { text: 'Lo más importante', cls: 'good' },
+      title: { text: '¿Cuál es el mayor dolor de tu equipo hoy?', cls: '' },
+      subtitle: { text: 'Velo se configura en torno a esto. No al revés.', cls: '' },
+      options: ['Nadie sabe en qué trabaja el resto', 'Las decisiones se retrasan por zonas horarias', 'Demasiadas reuniones, poco avance', 'Tareas que caen entre las grietas'],
+      optCls: '',
+      textCls: '',
+      cta: { text: 'Configurar Velo para esto →', cls: 'good-cta' },
+      skip: { text: 'Tengo otro problema', cls: 'good-skip' },
+      microcopy: { text: '', cls: '' },
+      annotations: [
+        { tag: 'win', el: 'Título', text: 'Preguntar por el dolor antes de mostrar features es la inversión más poderosa del flujo. El usuario siente que el producto es para él.' },
+        { tag: 'win', el: 'Opciones', text: 'Cada opción nombra una fricción real y específica de equipos distribuidos. El usuario se reconoce en por lo menos una.' },
+        { tag: 'micro', el: 'CTA dinámico', text: '"Configurar Velo para esto" cambia según la opción elegida — el botón confirma que escuchamos. Eso es microcopy de alto impacto.' }
+      ]
+    },
+    {
+      tag: { text: 'Tu primer momento real', cls: 'good' },
+      title: { text: 'Activa el flujo que va a cambiar tu lunes.', cls: '' },
+      subtitle: { text: 'El check-in automático. En 3 minutos está corriendo. Sin reunión, sin recordatorio manual.', cls: '' },
+      fields: [
+        { label: '¿A qué hora quieres el check-in semanal?', cls: '', inputCls: '', hint: '→ Velo lo envía solo. Tú no tienes que recordar nada.', hintCls: 'good-hint' },
+      ],
+      cta: { text: 'Activar mi primer flujo automático →', cls: 'good-cta' },
+      skip: { text: 'Lo hago después (aunque te recomiendo hacerlo ahora)', cls: 'good-skip' },
+      microcopy: { text: 'Este es el paso que más impacto tiene en la primera semana.', cls: 'good-note' },
+      annotations: [
+        { tag: 'win', el: 'Título', text: '"El flujo que va a cambiar tu lunes" es una promesa específica y temporal. No "mejora tu productividad" — cambia el lunes. Concreto y creíble.' },
+        { tag: 'micro', el: 'Hint del campo', text: '"Velo lo envía solo. Tú no tienes que recordar nada." Refuerza el beneficio central en el momento de mayor atención del usuario.' },
+        { tag: 'win', el: 'Skip honesto', text: 'El skip honesto — "aunque te recomiendo hacerlo ahora" — respeta la autonomía pero orienta sin imponer. Convierte más que un skip genérico.' }
+      ]
+    },
+    {
+      tag: { text: 'Ya está.', cls: 'good' },
+      title: { text: '¡Tu equipo ya no depende de tu memoria!', cls: '' },
+      subtitle: { text: 'El primer flujo está activo. El lunes que viene, Velo pregunta por tu equipo sin que tú lo pidas. Así empieza el cambio.', cls: '' },
+      success: true,
+      successCls: 'good-icon',
+      successIcon: '⚡',
+      successTitleCls: 'good-stitle',
+      successSubCls: 'good-ssub',
+      cta: { text: 'Ver mi primer flujo en acción →', cls: 'good-cta' },
+      microcopy: { text: 'Tiempo total: 3 minutos y 42 segundos. Récord personal.', cls: 'good-note' },
+      annotations: [
+        { tag: 'win', el: 'Título', text: '"¡Tu equipo ya no depende de tu memoria!" celebra la transformación del usuario, no la finalización del proceso. Esa es la diferencia.' },
+        { tag: 'win', el: 'Subtítulo', text: 'Describe el futuro inmediato — "el lunes que viene". Le da al usuario algo específico que esperar. El momentum no para aquí.' },
+        { tag: 'micro', el: 'Microcopy final', text: '"Tiempo total: 3 minutos y 42 segundos. Récord personal." — humor ligero que celebra al usuario. Hace que quiera compartir la experiencia.' }
+      ]
+    }
+  ]
+};
+
+function setMode(mode) {
+  currentMode = mode;
+  currentStep = 0;
+  selectedOpt = null;
+
+  const screen = document.getElementById('onboard-screen');
+  const btnBefore = document.getElementById('btn-before');
+  const btnAfter = document.getElementById('btn-after');
+  const frictionFill = document.getElementById('friction-fill');
+  const frictionPct = document.getElementById('friction-pct');
+
+  if (mode === 'before') {
+    screen.className = 'onboard-screen before-mode';
+    btnBefore.className = 'mode-pill before-active';
+    btnAfter.className = 'mode-pill';
+    frictionFill.style.width = '85%';
+    frictionFill.style.background = '#e74c3c';
+    frictionPct.style.color = '#e74c3c';
+    frictionPct.textContent = 'High';
+  } else {
+    screen.className = 'onboard-screen after-mode';
+    btnAfter.className = 'mode-pill after-active';
+    btnBefore.className = 'mode-pill';
+    frictionFill.style.width = '15%';
+    frictionFill.style.background = '#1D9E75';
+    frictionPct.style.color = '#1D9E75';
+    frictionPct.textContent = 'Low';
+  }
+
+  renderStep();
+}
+
+function renderStep() {
+  const data = steps[currentMode][currentStep];
+  const total = steps[currentMode].length;
+  const wrap = document.getElementById('screen-wrap');
+  const sidebar = document.getElementById('ann-cards');
+  const isBefore = currentMode === 'before';
+
+  // Progress
+  let progressHTML = '<div class="progress-bar">';
+  for (let i = 0; i < total; i++) {
+    const doneCls = i < currentStep ? (isBefore ? 'done-bad' : 'done') : '';
+    progressHTML += `<div class="progress-step ${doneCls}"></div>`;
+  }
+  progressHTML += `<span class="progress-text">${currentStep + 1} / ${total}</span></div>`;
+
+  // Success screen
+  if (data.success) {
+    wrap.innerHTML = `
+      ${progressHTML}
+      <div class="step-content success-screen">
+        <div class="success-icon ${data.successCls}">${data.successIcon}</div>
+        <h2 class="step-title ${data.successTitleCls || ''}">${data.title.text}</h2>
+        <p class="step-subtitle ${data.successSubCls || ''}">${data.subtitle.text}</p>
+        <button class="step-cta ${data.cta.cls}" onclick="resetFlow()">${data.cta.text}</button>
+        ${data.microcopy.text ? `<p class="microcopy-note ${data.microcopy.cls}">${data.microcopy.text}</p>` : ''}
+      </div>`;
+  } else if (data.options) {
+    // Radio step
+    let optHTML = '<div class="radio-group">';
+    data.options.forEach((opt, i) => {
+      optHTML += `<div class="radio-opt ${data.optCls}" id="opt${i}" onclick="selectOpt(${i}, this)">
+        <div class="radio-dot"></div>
+        <span class="radio-text ${data.textCls}">${opt}</span>
+      </div>`;
+    });
+    optHTML += '</div>';
+    wrap.innerHTML = `
+      ${progressHTML}
+      <div class="step-content">
+        <span class="step-tag ${data.tag.cls}">${data.tag.text}</span>
+        <h2 class="step-title ${data.title.cls}">${data.title.text}</h2>
+        <p class="step-subtitle ${data.subtitle.cls}">${data.subtitle.text}</p>
+        ${optHTML}
+        <button class="step-cta ${data.cta.cls}" onclick="nextStep()">${data.cta.text}</button>
+        ${data.skip ? `<span class="step-skip ${data.skip.cls}" onclick="nextStep()">${data.skip.text}</span>` : ''}
+      </div>`;
+  } else {
+    // Fields step
+    let fieldsHTML = '';
+    data.fields.forEach(f => {
+      fieldsHTML += `<div class="field-group">
+        <label class="field-label ${f.cls}">${f.label}</label>
+        <input class="field-input ${f.inputCls}" type="text" placeholder="">
+        ${f.hint ? `<p class="field-hint ${f.hintCls}">${f.hint}</p>` : ''}
+      </div>`;
+    });
+    wrap.innerHTML = `
+      ${progressHTML}
+      <div class="step-content">
+        <span class="step-tag ${data.tag.cls}">${data.tag.text}</span>
+        <h2 class="step-title ${data.title.cls}">${data.title.text}</h2>
+        <p class="step-subtitle ${data.subtitle.cls}">${data.subtitle.text}</p>
+        ${fieldsHTML}
+        <button class="step-cta ${data.cta.cls}" onclick="nextStep()">${data.cta.text}</button>
+        ${data.skip ? `<span class="step-skip ${data.skip.cls}" onclick="nextStep()">${data.skip.text}</span>` : ''}
+        ${data.microcopy.text ? `<p class="microcopy-note ${data.microcopy.cls}">${data.microcopy.text}</p>` : ''}
+      </div>`;
+  }
+
+  // Sidebar annotations
+  sidebar.innerHTML = '';
+  data.annotations.forEach((ann, i) => {
+    const card = document.createElement('div');
+    card.className = `annotation-card ${i === 0 ? 'highlight' : ''}`;
+    card.innerHTML = `
+      <span class="ann-element">${ann.el}</span>
+      <span class="ann-card-tag ${ann.tag}">${ann.tag === 'problem' ? 'Problema' : ann.tag === 'win' ? 'Decisión' : 'Microcopy'}</span>
+      <p class="ann-card-text">${ann.text}</p>`;
+    sidebar.appendChild(card);
+    setTimeout(() => card.style.opacity = '1', i * 150);
+    card.style.opacity = '0';
+    card.style.transition = 'opacity .4s ease';
+  });
+}
+
+function nextStep() {
+  const total = steps[currentMode].length;
+  if (currentStep < total - 1) {
+    currentStep++;
+    selectedOpt = null;
+    renderStep();
+  }
+}
+
+function selectOpt(idx, el) {
+  document.querySelectorAll('.radio-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOpt = idx;
+}
+
+function resetFlow() {
+  currentStep = 0;
+  selectedOpt = null;
+  renderStep();
+}
+
+// Init
+setMode('before');
+</script>
+
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+function setLang(lang) {
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-es]').forEach(el => {
+    const val = el.dataset[lang];
+    if (!val) return;
+    if (val.includes('<')) { el.innerHTML = val; } else { el.textContent = val; }
+  });
+}
+setLang('en');
+</script>
+</body>
+</html>

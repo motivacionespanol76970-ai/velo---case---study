@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velo — LinkedIn Copy: Before / After</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c; --paper: #f5f2eb; --cream: #ede9df; --accent: #c8f03d;
+    --teal: #1a6b5a; --teal-light: #e0f5ef; --muted: #7a7567;
+    --border: rgba(15,14,12,0.1);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --li-bg: #f3f2ef; --li-white: #ffffff; --li-border: #e0dfdc;
+    --li-text: #000000e6; --li-muted: #00000099; --li-blue: #0a66c2;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-body); background: var(--paper); color: var(--ink); min-height: 100vh; cursor: none; }
+  .cursor { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width .2s, height .2s; box-shadow: 0 0 0 1.5px rgba(15,14,12,.35); }
+  .cursor.big { width: 32px; height: 32px; opacity: .5; }
+
+  /* LANG TOGGLE */
+  .lang-bar { display: flex; align-items: center; gap: .5rem; }
+  .lang-btn { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; padding: .25rem .65rem; border-radius: 2px; border: 1px solid rgba(245,242,235,.2); background: none; color: rgba(245,242,235,.4); cursor: none; transition: all .2s; }
+  .lang-btn.active { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+
+  .page-header { background: var(--ink); padding: 2rem 3rem; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
+  .page-header-left { flex: 1; }
+  .header-eyebrow { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: .75rem; display: flex; align-items: center; gap: .6rem; }
+  .header-eyebrow::before { content: ''; display: inline-block; width: 18px; height: 1px; background: var(--accent); }
+  .header-title { font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5.5rem); line-height: .92; letter-spacing: .02em; color: var(--paper); }
+  .header-title span { color: var(--accent); }
+  .header-desc { font-size: .875rem; line-height: 1.65; color: rgba(245,242,235,.5); font-weight: 300; max-width: 340px; margin-top: 1.5rem; }
+  .header-right { display: flex; flex-direction: column; gap: .75rem; align-self: flex-start; align-items: flex-end; }
+  .header-badge { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; background: rgba(200,240,61,.1); color: var(--accent); border: 1px solid rgba(200,240,61,.2); padding: .4rem .9rem; border-radius: 2px; }
+
+  .post-nav { background: var(--cream); border-bottom: 1px solid var(--border); padding: 0 3rem; display: flex; gap: 0; overflow-x: auto; }
+  .post-tab { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; padding: 1rem 1.5rem; border: none; background: transparent; color: var(--muted); cursor: none; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+  .post-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .main { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 280px); }
+  .side { padding: 3rem; border-right: 1px solid var(--border); }
+  .side:last-child { border-right: none; }
+  .side-label { display: flex; align-items: center; gap: .75rem; font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 2rem; }
+  .side-label .indicator { width: 8px; height: 8px; border-radius: 50%; }
+  .before-label { color: #c0392b; } .before-label .indicator { background: #e74c3c; }
+  .after-label { color: var(--teal); } .after-label .indicator { background: #1D9E75; }
+
+  .li-card { background: var(--li-white); border: 1px solid var(--li-border); border-radius: 8px; overflow: hidden; font-family: -apple-system,'Segoe UI',sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .li-card-inner { padding: 12px 16px 0; }
+  .li-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+  .li-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#1a6b5a,#0a66c2); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; flex-shrink: 0; }
+  .li-meta { flex: 1; }
+  .li-name { font-size: 14px; font-weight: 600; color: var(--li-text); line-height: 1.3; }
+  .li-title { font-size: 12px; color: var(--li-muted); line-height: 1.4; margin-top: 1px; }
+  .li-time { font-size: 12px; color: var(--li-muted); margin-top: 2px; display: flex; align-items: center; gap: 3px; }
+  .li-more { font-size: 20px; color: var(--li-muted); cursor: default; padding: 0 4px; line-height: 1; margin-top: 2px; }
+  .li-body { font-size: 14px; line-height: 1.5; color: var(--li-text); margin-bottom: 10px; white-space: pre-line; }
+  .li-body.muted { color: rgba(0,0,0,.4); }
+  .li-hashtag { color: var(--li-blue); }
+  .li-image { width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .li-image.before-img { background: #f8f8f8; border-top: 1px solid var(--li-border); border-bottom: 1px solid var(--li-border); }
+  .li-image.after-img { background: #0f0e0c; border-top: 1px solid var(--li-border); border-bottom: 1px solid var(--li-border); }
+  .generic-banner { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 2rem; text-align: center; }
+  .generic-icon { font-size: 2.5rem; opacity: .3; }
+  .generic-text { font-size: 18px; font-weight: 700; color: #999; letter-spacing: -.02em; }
+  .generic-sub { font-size: 12px; color: #bbb; max-width: 200px; line-height: 1.4; }
+  .strategic-banner { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem 2rem; background: #0f0e0c; position: relative; }
+  .banner-tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: rgba(200,240,61,.1); border: 1px solid rgba(200,240,61,.2); padding: 3px 8px; border-radius: 2px; width: fit-content; }
+  .banner-headline { font-family: var(--font-display); font-size: 2rem; line-height: .95; letter-spacing: .02em; color: #f5f2eb; }
+  .banner-headline em { font-style: normal; color: var(--accent); }
+  .banner-footer { display: flex; align-items: center; justify-content: space-between; }
+  .banner-logo { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: .04em; color: rgba(245,242,235,.4); }
+  .banner-metric { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: rgba(245,242,235,.3); }
+  .dot-grid { position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); display: grid; grid-template-columns: repeat(5,8px); gap: 6px; }
+  .dot-grid span { width: 3px; height: 3px; border-radius: 50%; background: rgba(200,240,61,.2); display: block; }
+  .dot-grid span.lit { background: rgba(200,240,61,.7); }
+  .li-actions { display: flex; padding: 4px 8px; border-top: 1px solid var(--li-border); }
+  .li-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 10px 6px; font-size: 12px; font-weight: 600; color: var(--li-muted); border-radius: 4px; cursor: default; }
+  .li-reactions { padding: 6px 16px 4px; font-size: 12px; color: var(--li-muted); display: flex; align-items: center; gap: 4px; }
+
+  .annotations { margin-top: 2rem; display: flex; flex-direction: column; gap: .75rem; }
+  .annotation { display: flex; gap: 10px; align-items: flex-start; padding: .875rem 1rem; border-radius: 4px; }
+  .annotation.problem { background: #fdf0ef; }
+  .annotation.win { background: var(--teal-light); }
+  .ann-tag { font-family: var(--font-mono); font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+  .ann-tag.problem { background: #fcd9d6; color: #922b21; }
+  .ann-tag.win { background: #9FE1CB; color: #085041; }
+  .ann-text { font-size: .8rem; line-height: 1.55; color: var(--muted); font-weight: 300; }
+
+  .strategy-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border-top: 1px solid var(--border); }
+  .strategy-item { background: var(--ink); padding: 2rem; text-align: center; }
+  .strategy-number { font-family: var(--font-display); font-size: 2.5rem; line-height: 1; color: var(--accent); margin-bottom: .5rem; }
+  .strategy-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(245,242,235,.4); line-height: 1.5; }
+
+  .post-panel { display: none; }
+  .post-panel.active { display: contents; }
+
+  .metrics-row { display: flex; gap: 8px; margin-top: 1.5rem; }
+  .metric-chip { flex: 1; text-align: center; padding: .75rem .5rem; border-radius: 4px; background: var(--cream); border: 1px solid var(--border); }
+  .metric-chip.bad { background: #fdf0ef; border-color: #fcd9d6; }
+  .metric-chip.good { background: var(--teal-light); border-color: #9FE1CB; }
+  .metric-val { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--ink); margin-bottom: 3px; }
+  .metric-chip.bad .metric-val { color: #922b21; }
+  .metric-chip.good .metric-val { color: var(--teal); }
+  .metric-desc { font-family: var(--font-mono); font-size: .58rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); line-height: 1.4; }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .side { border-right: none; border-bottom: 1px solid var(--border); }
+    .strategy-strip { grid-template-columns: repeat(2,1fr); }
+    .page-header { flex-direction: column; align-items: flex-start; }
+    .post-nav, .side { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+
+<header class="page-header">
+  <div class="page-header-left">
+    <div class="header-eyebrow" data-es="Fase 02 · Velo Case Study" data-en="Phase 02 · Velo Case Study">Phase 02 · Velo Case Study</div>
+    <h1 class="header-title">LinkedIn<br><span data-es="Antes /" data-en="Before /">Before /</span><br><span data-es="Después." data-en="After.">After.</span></h1>
+    <p class="header-desc" data-es="Tres posts. El mismo producto. Dos voces completamente distintas. Una habla al vacío. La otra habla a una persona real." data-en="Three posts. Same product. Two completely different voices. One talks to no one. The other talks to a real person.">Three posts. Same product. Two completely different voices. One talks to no one. The other talks to a real person.</p>
+  </div>
+  <div class="header-right">
+    <div class="lang-bar">
+      <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+    <span class="header-badge">B2B SaaS · LATAM → Global</span>
+  </div>
+</header>
+
+<nav class="post-nav">
+  <button class="post-tab active" onclick="showPost('post1',this)" data-es="Post 01 — Lanzamiento" data-en="Post 01 — Launch">Post 01 — Launch</button>
+  <button class="post-tab" onclick="showPost('post2',this)" data-es="Post 02 — Dolor del cliente" data-en="Post 02 — Customer pain">Post 02 — Customer pain</button>
+  <button class="post-tab" onclick="showPost('post3',this)" data-es="Post 03 — Prueba social" data-en="Post 03 — Social proof">Post 03 — Social proof</button>
+</nav>
+
+<div class="main">
+
+  <!-- POST 1 -->
+  <div class="post-panel active" id="post1">
+    <div class="side">
+      <div class="side-label before-label">
+        <span class="indicator"></span>
+        <span data-es="Antes — copy genérico" data-en="Before — generic copy">Before — generic copy</span>
+      </div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 3d</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body muted">🚀 ¡Grandes noticias! Velo ya está disponible para todos los equipos.
+
+Nuestra plataforma todo-en-uno te ayuda a aumentar la productividad y optimizar tus flujos de trabajo.
+
+✅ Fácil de usar
+✅ Integración con tus herramientas favoritas
+✅ Soporte 24/7
+
+¡Empieza hoy gratis!
+
+<span class="li-hashtag">#Productividad #SaaS #Startup #Trabajo</span></div>
+        </div>
+        <div class="li-image before-img">
+          <div class="generic-banner">
+            <div class="generic-icon">🚀</div>
+            <div class="generic-text" data-es="¡Ya disponible!" data-en="Now Available!">Now Available!</div>
+            <div class="generic-sub" data-es="La solución todo-en-uno para equipos modernos" data-en="The all-in-one solution for modern teams">The all-in-one solution for modern teams</div>
+          </div>
+        </div>
+        <div class="li-reactions">
+          <span>👍❤️</span>
+          <span data-es="12 reacciones · 1 comentario" data-en="12 reactions · 1 comment">12 reactions · 1 comment</span>
+        </div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip bad"><div class="metric-val">0.4%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip bad"><div class="metric-val">12</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip bad"><div class="metric-val">~80</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text" data-es="Los emojis de cohete y checkmarks son la señal más clara de copy sin estrategia. Señalizan que no hay voz de marca." data-en="Rocket emojis and checkmarks are the clearest sign of copy with no strategy. They signal there is no brand voice.">Rocket emojis and checkmarks are the clearest sign of copy with no strategy. They signal there is no brand voice.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text" data-es='"Plataforma todo-en-uno" no dice nada. No hay tensión, no hay audiencia, no hay razón para seguir leyendo.' data-en='"All-in-one platform" says nothing. No tension, no audience, no reason to keep reading.'>"All-in-one platform" says nothing. No tension, no audience, no reason to keep reading.</p>
+        </div>
+        <div class="annotation problem">
+          <span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span>
+          <p class="ann-text" data-es="4 hashtags genéricos que ningún founder de startup sigue activamente. Alcance mínimo, ninguna conversación." data-en="4 generic hashtags no startup founder actively follows. Minimal reach, zero conversation.">4 generic hashtags no startup founder actively follows. Minimal reach, zero conversation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="side-label after-label">
+        <span class="indicator"></span>
+        <span data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</span>
+      </div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 3d</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body">Lanzamos Velo porque perdimos demasiadas reuniones esperando que alguien en otra zona horaria se conectara.
+
+Hoy, los equipos de Bogotá a Lisboa no deberían necesitar sincronizarse en tiempo real para avanzar.
+
+Velo automatiza los check-ins, handoffs y updates que frenan a startups distribuidas. Para que tu equipo avance aunque nadie esté mirando.
+
+Si tienes entre 5 y 20 personas en múltiples zonas horarias — esto es para ti.
+
+14 días gratis. Sin tarjeta. Sin reunión de onboarding.
+
+<span class="li-hashtag">#DistributedTeams #StartupLatam #AsyncWork</span></div>
+        </div>
+        <div class="li-image after-img">
+          <div class="strategic-banner">
+            <div class="banner-tag" data-es="Nacido en LATAM · Escalando global" data-en="Born in LATAM · Scaling global">Born in LATAM · Scaling global</div>
+            <div class="banner-headline" data-es="Tu equipo<br>no necesita<br><em>estar online</em><br>para avanzar." data-en="Your team<br>doesn't need<br><em>to be online</em><br>to move forward.">Your team<br>doesn't need<br><em>to be online</em><br>to move forward.</div>
+            <div class="banner-footer">
+              <span class="banner-logo">VELO</span>
+              <span class="banner-metric" data-es="5–20 personas · Múltiples zonas horarias" data-en="5–20 people · Multiple time zones">5–20 people · Multiple time zones</span>
+            </div>
+            <div class="dot-grid"><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="li-reactions">
+          <span>👍❤️🔥</span>
+          <span data-es="347 reacciones · 89 comentarios · 43 reposts" data-en="347 reactions · 89 comments · 43 reposts">347 reactions · 89 comments · 43 reposts</span>
+        </div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip good"><div class="metric-val">4.8%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip good"><div class="metric-val">347</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip good"><div class="metric-val">12K</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text" data-es="Abre con la historia del fundador, no con el producto. El lector se conecta emocionalmente antes de saber qué es Velo." data-en="Opens with the founder's story, not the product. The reader connects emotionally before knowing what Velo is.">Opens with the founder's story, not the product. The reader connects emotionally before knowing what Velo is.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text" data-es='"Bogotá a Lisboa" nombra la realidad de equipos LATAM reales. Convierte un post genérico en uno reconocible.' data-en='"Bogotá to Lisbon" names the reality of real LATAM teams. Turns a generic post into a recognizable one.'>"Bogotá to Lisbon" names the reality of real LATAM teams. Turns a generic post into a recognizable one.</p>
+        </div>
+        <div class="annotation win">
+          <span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span>
+          <p class="ann-text" data-es='"5 a 20 personas en múltiples zonas horarias" define la audiencia en una línea. El lector ideal sabe de inmediato que es para él.' data-en='"5 to 20 people across multiple time zones" defines the audience in one line. The ideal reader knows immediately it\'s for them.'>"5 to 20 people across multiple time zones" defines the audience in one line. The ideal reader knows immediately it's for them.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 2 -->
+  <div class="post-panel" id="post2">
+    <div class="side">
+      <div class="side-label before-label"><span class="indicator"></span><span data-es="Antes — copy genérico" data-en="Before — generic copy">Before — generic copy</span></div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 1w</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body muted">💡 ¿Sabías que los equipos productivos trabajan más inteligente, no más duro?
+
+Con las herramientas correctas, puedes:
+→ Reducir el tiempo en reuniones
+→ Mejorar la comunicación
+→ Aumentar los resultados
+
+Velo te ayuda a lograrlo. ¡Pruébalo gratis!
+
+<span class="li-hashtag">#Productividad #Trabajo #Equipos #Herramientas</span></div>
+        </div>
+        <div class="li-image before-img">
+          <div class="generic-banner">
+            <div class="generic-icon">💡</div>
+            <div class="generic-text" data-es="Trabaja más inteligente." data-en="Work Smarter.">Work Smarter.</div>
+            <div class="generic-sub" data-es="No más duro. Con las herramientas correctas." data-en="Not harder. With the right tools.">Not harder. With the right tools.</div>
+          </div>
+        </div>
+        <div class="li-reactions"><span>👍</span><span data-es="8 reacciones · 0 comentarios" data-en="8 reactions · 0 comments">8 reactions · 0 comments</span></div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip bad"><div class="metric-val">0.2%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip bad"><div class="metric-val">8</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip bad"><div class="metric-val">~50</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation problem"><span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span><p class="ann-text" data-es='"Trabaja más inteligente, no más duro" tiene 30 años de uso. No hay ninguna razón para detenerse en este post.' data-en='"Work smarter, not harder" is 30 years old. There is no reason to stop scrolling for this post.'>"Work smarter, not harder" is 30 years old. There is no reason to stop scrolling for this post.</p></div>
+        <div class="annotation problem"><span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span><p class="ann-text" data-es="Las flechas con bullets son el formato más genérico de LinkedIn. El algoritmo lo penaliza. Los lectores lo ignoran." data-en="Arrow bullets are the most generic LinkedIn format. The algorithm penalizes it. Readers ignore it.">Arrow bullets are the most generic LinkedIn format. The algorithm penalizes it. Readers ignore it.</p></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="side-label after-label"><span class="indicator"></span><span data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</span></div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 1w</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body">El mayor problema de los equipos distribuidos no es la comunicación.
+
+Es que demasiadas cosas dependen de que alguien recuerde hacer algo.
+
+El check-in del lunes. El update de fin de sprint. El recordatorio al cliente. El handoff entre diseño y dev.
+
+Todas esperando a que una persona se acuerde.
+
+Hasta que no se acuerda.
+
+Velo automatiza exactamente esas cosas. Para que tu startup no dependa de la memoria de nadie.
+
+¿Cuántas horas perdió tu equipo esta semana en coordinación que debería ser automática?
+
+<span class="li-hashtag">#StartupLatam #RemoteWork #Automatización</span></div>
+        </div>
+        <div class="li-image after-img">
+          <div class="strategic-banner">
+            <div class="banner-tag" data-es="El problema real" data-en="The real problem">The real problem</div>
+            <div class="banner-headline" data-es="Tu startup<br>no puede<br><em>depender</em><br>de la memoria." data-en="Your startup<br>can't<br><em>depend</em><br>on memory.">Your startup<br>can't<br><em>depend</em><br>on memory.</div>
+            <div class="banner-footer">
+              <span class="banner-logo">VELO</span>
+              <span class="banner-metric" data-es="Automatización async · Startups 1–20" data-en="Async automation · Startups 1–20">Async automation · Startups 1–20</span>
+            </div>
+            <div class="dot-grid"><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span></div>
+          </div>
+        </div>
+        <div class="li-reactions"><span>👍❤️🔥💡</span><span data-es="512 reacciones · 134 comentarios · 71 reposts" data-en="512 reactions · 134 comments · 71 reposts">512 reactions · 134 comments · 71 reposts</span></div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip good"><div class="metric-val">6.1%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip good"><div class="metric-val">512</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip good"><div class="metric-val">18K</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation win"><span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span><p class="ann-text" data-es="La estructura de párrafos cortos es intencional — cada línea es un gancho que obliga al lector a seguir bajando." data-en="The short paragraph structure is intentional — each line is a hook that forces the reader to keep scrolling.">The short paragraph structure is intentional — each line is a hook that forces the reader to keep scrolling.</p></div>
+        <div class="annotation win"><span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span><p class="ann-text" data-es="Cierra con una pregunta que invita al comentario. El algoritmo de LinkedIn prioriza posts con conversación activa." data-en="Closes with a question that invites comments. LinkedIn's algorithm prioritizes posts with active conversation.">Closes with a question that invites comments. LinkedIn's algorithm prioritizes posts with active conversation.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST 3 -->
+  <div class="post-panel" id="post3">
+    <div class="side">
+      <div class="side-label before-label"><span class="indicator"></span><span data-es="Antes — copy genérico" data-en="Before — generic copy">Before — generic copy</span></div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 2w</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body muted">⭐ ¡Nuestros clientes nos adoran!
+
+"Velo es una herramienta muy útil para nuestro equipo."
+— Usuario satisfecho
+
+¡Únete a cientos de equipos que ya usan Velo para mejorar su productividad!
+
+🔗 Pruébalo gratis hoy.
+
+<span class="li-hashtag">#Testimonial #Clientes #Productividad</span></div>
+        </div>
+        <div class="li-image before-img">
+          <div class="generic-banner">
+            <div class="generic-icon">⭐</div>
+            <div class="generic-text" data-es="¡Nuestros clientes nos adoran!" data-en="Our customers love us!">Our customers love us!</div>
+            <div class="generic-sub" data-es="Únete a cientos de equipos felices" data-en="Join hundreds of happy teams">Join hundreds of happy teams</div>
+          </div>
+        </div>
+        <div class="li-reactions"><span>👍</span><span data-es="5 reacciones · 0 comentarios" data-en="5 reactions · 0 comments">5 reactions · 0 comments</span></div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip bad"><div class="metric-val">0.1%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip bad"><div class="metric-val">5</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip bad"><div class="metric-val">~30</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation problem"><span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span><p class="ann-text" data-es='"Herramienta muy útil" es el testimonio más inútil posible. No hay resultado, no hay contexto, no hay credibilidad.' data-en='"Very useful tool" is the most useless testimonial possible. No result, no context, no credibility.'>"Very useful tool" is the most useless testimonial possible. No result, no context, no credibility.</p></div>
+        <div class="annotation problem"><span class="ann-tag problem" data-es="Problema" data-en="Problem">Problem</span><p class="ann-text" data-es='"Usuario satisfecho" como atribución es una señal de alarma. Nadie lo cree. Destruye confianza en vez de construirla.' data-en='"Satisfied user" as attribution is a red flag. Nobody believes it. It destroys trust instead of building it.'>"Satisfied user" as attribution is a red flag. Nobody believes it. It destroys trust instead of building it.</p></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="side-label after-label"><span class="indicator"></span><span data-es="Después — copy estratégico" data-en="After — strategic copy">After — strategic copy</span></div>
+      <div class="li-card">
+        <div class="li-card-inner">
+          <div class="li-header">
+            <div class="li-avatar">V</div>
+            <div class="li-meta">
+              <div class="li-name">Velo App</div>
+              <div class="li-title" data-es="Automation for distributed startups • 1,234 seguidores" data-en="Automation for distributed startups • 1,234 followers">Automation for distributed startups • 1,234 followers</div>
+              <div class="li-time">🌐 2w</div>
+            </div>
+            <div class="li-more">···</div>
+          </div>
+          <div class="li-body">"Antes de Velo, yo era el check-in."
+
+— Daniela R., co-fundadora de una startup de diseño en Medellín con equipo en CDMX y Madrid.
+
+Cada lunes a las 9am, ella enviaba los mismos mensajes. A las mismas personas. Preguntando lo mismo.
+
+Tres semanas después de activar Velo: los updates llegan solos. El equipo sabe qué sigue sin que nadie lo pida. Y ella usa ese tiempo en clientes.
+
+No cambiamos cómo trabaja su equipo. Eliminamos lo que los frenaba.
+
+¿Cuánto tiempo te está costando ser el check-in de tu propio equipo?
+
+<span class="li-hashtag">#StartupLatam #Founders #Automatización</span></div>
+        </div>
+        <div class="li-image after-img">
+          <div class="strategic-banner">
+            <div class="banner-tag" data-es="Caso real · Medellín → Madrid" data-en="Real case · Medellín → Madrid">Real case · Medellín → Madrid</div>
+            <div class="banner-headline">"Yo era<br>el <em>check-in</em><br>de mi equipo."</div>
+            <div class="banner-footer">
+              <span class="banner-logo">VELO</span>
+              <span class="banner-metric" data-es="Daniela R. · Co-fundadora" data-en="Daniela R. · Co-founder">Daniela R. · Co-founder</span>
+            </div>
+            <div class="dot-grid"><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span><span class="lit"></span><span></span><span class="lit"></span><span class="lit"></span><span></span></div>
+          </div>
+        </div>
+        <div class="li-reactions"><span>👍❤️🔥💡😮</span><span data-es="891 reacciones · 203 comentarios · 118 reposts" data-en="891 reactions · 203 comments · 118 reposts">891 reactions · 203 comments · 118 reposts</span></div>
+        <div class="li-actions">
+          <div class="li-action">👍 <span data-es="Me gusta" data-en="Like">Like</span></div>
+          <div class="li-action">💬 <span data-es="Comentar" data-en="Comment">Comment</span></div>
+          <div class="li-action">🔁 <span data-es="Compartir" data-en="Share">Share</span></div>
+          <div class="li-action">✈️ <span data-es="Enviar" data-en="Send">Send</span></div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-chip good"><div class="metric-val">8.3%</div><div class="metric-desc" data-es="CTR estimado" data-en="Estimated CTR">Estimated CTR</div></div>
+        <div class="metric-chip good"><div class="metric-val">891</div><div class="metric-desc" data-es="Reacciones" data-en="Reactions">Reactions</div></div>
+        <div class="metric-chip good"><div class="metric-val">34K</div><div class="metric-desc" data-es="Alcance orgánico" data-en="Organic reach">Organic reach</div></div>
+      </div>
+      <div class="annotations">
+        <div class="annotation win"><span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span><p class="ann-text" data-es='El testimonio abre con una frase que el lector puede hacerse propia: "yo era el check-in". Eso genera identificación inmediata.' data-en='The testimonial opens with a line the reader can claim as their own: "I was the check-in." That creates instant identification.'>The testimonial opens with a line the reader can claim as their own: "I was the check-in." That creates instant identification.</p></div>
+        <div class="annotation win"><span class="ann-tag win" data-es="Decisión" data-en="Decision">Decision</span><p class="ann-text" data-es="Nombre real, ciudad real, contexto real. La especificidad es lo que convierte un testimonio genérico en prueba social creíble." data-en="Real name, real city, real context. Specificity is what turns a generic testimonial into credible social proof.">Real name, real city, real context. Specificity is what turns a generic testimonial into credible social proof.</p></div>
+        <div class="annotation win"><span class="ann-tag win" data-es="Localización" data-en="Localization">Localization</span><p class="ann-text" data-es="Medellín → CDMX → Madrid. Tres ciudades que mapean el viaje real de una startup LATAM escalando a mercados hispanohablantes." data-en="Medellín → CDMX → Madrid. Three cities that map the real journey of a LATAM startup scaling to Spanish-speaking markets.">Medellín → CDMX → Madrid. Three cities that map the real journey of a LATAM startup scaling to Spanish-speaking markets.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="strategy-strip">
+  <div class="strategy-item">
+    <div class="strategy-number">3×</div>
+    <div class="strategy-label" data-es="Más engagement<br>con copy específico" data-en="More engagement<br>with specific copy">More engagement<br>with specific copy</div>
+  </div>
+  <div class="strategy-item">
+    <div class="strategy-number">150×</div>
+    <div class="strategy-label" data-es="Más alcance orgánico<br>promedio por post" data-en="More organic reach<br>average per post">More organic reach<br>average per post</div>
+  </div>
+  <div class="strategy-item">
+    <div class="strategy-number">0</div>
+    <div class="strategy-label" data-es="Emojis decorativos<br>en el copy nuevo" data-en="Decorative emojis<br>in the new copy">Decorative emojis<br>in the new copy</div>
+  </div>
+  <div class="strategy-item">
+    <div class="strategy-number">1</div>
+    <div class="strategy-label" data-es="Audiencia definida<br>en cada post" data-en="Defined audience<br>in every post">Defined audience<br>in every post</div>
+  </div>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursor.style.left = e.clientX+'px'; cursor.style.top = e.clientY+'px'; });
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.querySelectorAll('[data-es]').forEach(el => {
+    const val = el.dataset[lang];
+    if (!val) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.value = val;
+    } else if (val.includes('<br>') || val.includes('<em>')) {
+      el.innerHTML = val;
+    } else {
+      el.textContent = val;
+    }
+  });
+}
+
+function showPost(id, btn) {
+  document.querySelectorAll('.post-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.post-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Init EN
+setLang('en');
+</script>
+</body>
+</html>
